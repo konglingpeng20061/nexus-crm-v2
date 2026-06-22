@@ -1,0 +1,14 @@
+<template>
+  <el-breadcrumb separator="/">
+    <el-breadcrumb-item :to="{ path: '/' }">NexusCRM</el-breadcrumb-item>
+    <el-breadcrumb-item v-if="route.meta.title">
+      {{ route.meta.title }}
+    </el-breadcrumb-item>
+  </el-breadcrumb>
+</template>
+
+<script setup>
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+</script>
