@@ -200,7 +200,7 @@ const allUsers = [...demoUsers, ...extraUsers]
 export function generateSeedData() {
   faker.seed(2026)
   return {
-    version: 2,
+    version: 3,
     seed: 2026,
     generatedAt: new Date().toISOString(),
     users: allUsers,

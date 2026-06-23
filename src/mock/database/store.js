@@ -3,7 +3,7 @@ import { generateSeedData } from './seed'
 const STORAGE_KEY = 'nexus-crm-mock-data'
 // 当前数据版本，用于检测 localStorage 中是否存在旧版本数据
 // 版本升级时旧数据会自动重置，避免字段不匹配导致登录失败
-const CURRENT_VERSION = 2
+const CURRENT_VERSION = 3
 
 function loadFromStorage() {
   try {

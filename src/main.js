@@ -8,6 +8,13 @@ import './styles/index.scss'
 
 async function bootstrap() {
   if (import.meta.env.DEV) {
+    // 清除旧的 MSW Service Worker 缓存，确保加载最新 handler
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        await registration.unregister()
+      }
+    }
     const { worker } = await import('./mock/browser')
     await worker.start({ onUnhandledRequest: 'bypass' })
   }

@@ -35,3 +35,6 @@ pnpm-debug.log*
 
 # ZIP archive
 *.zip
+
+# Local dev helper
+git.cmd
