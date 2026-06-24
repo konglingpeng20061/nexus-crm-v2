@@ -23,7 +23,7 @@
 
     <!-- 快捷操作 -->
     <div class="quick-actions">
-      <h3>快捷操作</h3>
+      <h3 class="section-title">快捷操作</h3>
       <el-space wrap>
         <el-button
           v-if="userStore.hasPermission('customer:create')"
@@ -379,17 +379,20 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .dashboard-view {
-  padding-bottom: 24px;
+  padding-bottom: 32px;
 
   &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 
     h2 {
       margin: 0;
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 600;
+      color: #1d2129;
+      letter-spacing: -0.02em;
     }
   }
 
@@ -400,20 +403,29 @@ onMounted(() => {
 }
 
 .metric-row {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 
   .el-col {
     margin-bottom: 16px;
+    animation: card-enter 0.5s ease both;
+
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.04}s;
+      }
+    }
   }
 }
 
-.quick-actions {
-  margin-bottom: 24px;
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d2129;
+  margin: 0 0 14px;
+}
 
-  h3 {
-    margin: 0 0 12px;
-    font-size: 16px;
-  }
+.quick-actions {
+  margin-bottom: 28px;
 }
 
 .chart-row {
@@ -421,6 +433,10 @@ onMounted(() => {
 
   .chart-col {
     margin-bottom: 16px;
+    animation: card-enter 0.55s ease both;
+
+    &:nth-child(1) { animation-delay: 0.08s; }
+    &:nth-child(2) { animation-delay: 0.12s; }
   }
 }
 
@@ -428,8 +444,13 @@ onMounted(() => {
   background: #fff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
   position: relative;
+  transition: box-shadow 0.25s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .chart-error {
@@ -439,6 +460,21 @@ onMounted(() => {
 .activity-row {
   .activity-col {
     margin-bottom: 16px;
+    animation: card-enter 0.6s ease both;
+
+    &:nth-child(1) { animation-delay: 0.16s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>

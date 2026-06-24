@@ -1,16 +1,17 @@
 <template>
   <div ref="chartRef" class="base-chart" :style="{ height: typeof height === 'number' ? `${height}px` : height }">
-    <div v-if="loading" class="base-chart__overlay">
-      <el-skeleton animated />
-    </div>
-    <div v-else-if="empty" class="base-chart__overlay">
-      <el-empty :description="emptyText" />
-    </div>
+    <div ref="echartsRef" class="base-chart__canvas" />
+    <transition name="base-chart-fade">
+      <div v-if="showOverlay" class="base-chart__overlay">
+        <el-skeleton v-if="loading" animated />
+        <el-empty v-else :description="emptyText" />
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import * as echarts from 'echarts/core'
 import {
   FunnelChart,
@@ -48,12 +49,15 @@ const props = defineProps({
 })
 
 const chartRef = ref(null)
+const echartsRef = ref(null)
 let chartInstance = null
 let resizeObserver = null
 
+const showOverlay = computed(() => props.loading || props.empty)
+
 function initChart() {
-  if (!chartRef.value || chartInstance) return
-  chartInstance = echarts.init(chartRef.value)
+  if (!echartsRef.value || chartInstance) return
+  chartInstance = echarts.init(echartsRef.value)
   if (props.option) {
     chartInstance.setOption(props.option, props.notMerge)
   }
@@ -107,6 +111,11 @@ watch(() => [props.empty, props.loading], () => {
   width: 100%;
   min-height: 200px;
 
+  &__canvas {
+    width: 100%;
+    height: 100%;
+  }
+
   &__overlay {
     position: absolute;
     inset: 0;
@@ -116,5 +125,15 @@ watch(() => [props.empty, props.loading], () => {
     background: #fff;
     z-index: 1;
   }
+}
+
+.base-chart-fade-enter-active,
+.base-chart-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.base-chart-fade-enter-from,
+.base-chart-fade-leave-to {
+  opacity: 0;
 }
 </style>

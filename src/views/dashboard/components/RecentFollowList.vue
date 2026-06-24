@@ -7,38 +7,51 @@
       </el-button>
     </div>
 
-    <el-skeleton v-if="loading" :rows="5" animated />
+    <div class="activity-list__body">
+      <el-skeleton v-if="loading" :rows="5" animated />
 
-    <el-empty v-else-if="items.length === 0" description="暂无跟进记录" />
+      <el-empty v-else-if="items.length === 0" description="暂无跟进记录" />
 
-    <div v-else class="activity-list__items">
-      <div
-        v-for="item in items"
-        :key="item.id"
-        class="activity-item"
-      >
-        <div class="activity-item__main">
-          <div class="activity-item__title-row">
-            <el-tag size="small" :type="methodType(item.method)">
-              {{ methodLabel(item.method) }}
-            </el-tag>
-            <span class="activity-item__title">{{ item.customerName }}</span>
-          </div>
-          <div class="activity-item__content">
-            {{ item.content }}
-          </div>
-          <div class="activity-item__meta">
-            <span>负责人：{{ item.ownerName }}</span>
-            <span>创建：{{ formatDateTime(item.createdAt) }}</span>
-            <span v-if="item.nextFollowAt">下次跟进：{{ formatDate(item.nextFollowAt) }}</span>
+      <template v-else>
+        <div class="activity-list__items" :class="{ collapsed: isCollapsed }">
+          <div
+            v-for="item in visibleItems"
+            :key="item.id"
+            class="activity-item"
+          >
+            <div class="activity-item__main">
+              <div class="activity-item__title-row">
+                <el-tag size="small" :type="methodType(item.method)">
+                  {{ methodLabel(item.method) }}
+                </el-tag>
+                <span class="activity-item__title">{{ item.customerName }}</span>
+              </div>
+              <div class="activity-item__content">
+                {{ item.content }}
+              </div>
+              <div class="activity-item__meta">
+                <span>负责人：{{ item.ownerName }}</span>
+                <span>创建：{{ formatDateTime(item.createdAt) }}</span>
+                <span v-if="item.nextFollowAt">下次跟进：{{ formatDate(item.nextFollowAt) }}</span>
+              </div>
+            </div>
+            <div class="activity-item__actions">
+              <el-button v-if="canEdit(item)" type="primary" size="small" text :icon="Edit" @click="$emit('edit', item)">
+                编辑
+              </el-button>
+            </div>
           </div>
         </div>
-        <div class="activity-item__actions">
-          <el-button v-if="canEdit(item)" type="primary" size="small" text :icon="Edit" @click="$emit('edit', item)">
-            编辑
+
+        <div v-if="items.length > collapseThreshold" class="activity-list__footer">
+          <el-button type="primary" link size="small" @click="toggleCollapsed">
+            {{ isCollapsed ? `展开全部 (${items.length})` : '收起' }}
+            <el-icon class="expand-icon" :class="{ 'is-expanded': !isCollapsed }">
+              <ArrowDown />
+            </el-icon>
           </el-button>
         </div>
-      </div>
+      </template>
     </div>
 
     <div v-if="error" class="activity-list__error">
@@ -52,8 +65,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Plus, Edit } from '@element-plus/icons-vue'
+import { ref, computed } from 'vue'
+import { Plus, Edit, ArrowDown } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { formatDate, formatDateTime } from '@/utils/format'
 
@@ -69,6 +82,20 @@ const userStore = useUserStore()
 
 const isAdmin = computed(() => userStore.user?.role === 'admin')
 const canCreate = computed(() => true)
+
+const collapseThreshold = 5
+const isCollapsed = ref(true)
+
+const visibleItems = computed(() => {
+  if (!isCollapsed.value || props.items.length <= collapseThreshold) {
+    return props.items
+  }
+  return props.items.slice(0, collapseThreshold)
+})
+
+function toggleCollapsed() {
+  isCollapsed.value = !isCollapsed.value
+}
 
 function canEdit(item) {
   return isAdmin.value || item.ownerId === userStore.user?.id
@@ -101,17 +128,46 @@ function methodLabel(method) {
     h4 {
       margin: 0;
       font-size: 16px;
+      font-weight: 600;
+      color: #303133;
     }
+  }
+
+  &__body {
+    min-height: 120px;
   }
 
   &__items {
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    &.collapsed {
+      .activity-item:nth-child(n + 6) {
+        display: none;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #ebeef5;
   }
 
   &__error {
     margin-top: 12px;
+  }
+}
+
+.expand-icon {
+  margin-left: 4px;
+  transition: transform 0.25s ease;
+
+  &.is-expanded {
+    transform: rotate(180deg);
   }
 }
 
@@ -123,6 +179,12 @@ function methodLabel(method) {
   padding: 12px;
   border-radius: 8px;
   background: #f5f7fa;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: #eef1f6;
+    transform: translateX(2px);
+  }
 
   &__main {
     flex: 1;
@@ -138,6 +200,7 @@ function methodLabel(method) {
 
   &__title {
     font-weight: 500;
+    color: #303133;
   }
 
   &__content {
