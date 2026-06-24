@@ -7,7 +7,7 @@
       <div v-for="api in apiList" :key="api.path" class="page-card api-item">
         <div class="api-header">
           <el-tag :type="methodTag(api.method)" size="small">{{ api.method }}</el-tag>
-          <span class="api-path">{{ api.path }}</span>
+          <span class="api-path">/api{{ api.path }}</span>
           <span class="api-desc">{{ api.desc }}</span>
         </div>
         <div class="api-action">
@@ -34,23 +34,13 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { getMockHealth, resetMockData } from '@/api/mock'
-import {
-  getDashboardSummary,
-  getDashboardCustomerOptions,
-  getTodos,
-  getRecentFollows,
-  getSalesFunnel,
-  getContractTrend,
-  getTicketStatusDistribution
-} from '@/api/dashboard'
+import request from '@/api/request'
 
 const apiList = reactive([
   {
     method: 'GET',
-    path: '/api/health',
+    path: '/health',
     desc: '获取模拟服务状态和数据版本',
-    requestFn: getMockHealth,
     loading: false,
     result: null,
     statusCode: null,
@@ -58,9 +48,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/summary',
+    path: '/dashboard/summary',
     desc: '工作台六项核心指标聚合',
-    requestFn: getDashboardSummary,
     loading: false,
     result: null,
     statusCode: null,
@@ -68,9 +57,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/customers',
+    path: '/dashboard/customers',
     desc: '客户下拉选项',
-    requestFn: getDashboardCustomerOptions,
     loading: false,
     result: null,
     statusCode: null,
@@ -78,9 +66,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/todos',
+    path: '/dashboard/todos',
     desc: '今日待办列表',
-    requestFn: getTodos,
     loading: false,
     result: null,
     statusCode: null,
@@ -88,9 +75,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/recent-follows',
+    path: '/dashboard/recent-follows',
     desc: '最近客户跟进记录',
-    requestFn: getRecentFollows,
     loading: false,
     result: null,
     statusCode: null,
@@ -98,9 +84,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/charts/sales-funnel',
+    path: '/dashboard/charts/sales-funnel',
     desc: '销售漏斗数据',
-    requestFn: getSalesFunnel,
     loading: false,
     result: null,
     statusCode: null,
@@ -108,9 +93,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/charts/contract-trend',
+    path: '/dashboard/charts/contract-trend',
     desc: '十二个月合同趋势',
-    requestFn: getContractTrend,
     loading: false,
     result: null,
     statusCode: null,
@@ -118,9 +102,8 @@ const apiList = reactive([
   },
   {
     method: 'GET',
-    path: '/api/dashboard/charts/ticket-status',
+    path: '/dashboard/charts/ticket-status',
     desc: '工单状态分布',
-    requestFn: getTicketStatusDistribution,
     loading: false,
     result: null,
     statusCode: null,
@@ -128,9 +111,8 @@ const apiList = reactive([
   },
   {
     method: 'POST',
-    path: '/api/mock/reset',
+    path: '/mock/reset',
     desc: '重置模拟数据',
-    requestFn: resetMockData,
     loading: false,
     result: null,
     statusCode: null,
@@ -147,7 +129,11 @@ async function sendRequest(api) {
   api.loading = true
   const start = Date.now()
   try {
-    const res = await api.requestFn()
+    const res = await request({
+      method: api.method,
+      url: api.path,
+      __fullResponse: true
+    })
     api.statusCode = res.status
     api.result = res.data
   } catch (err) {

@@ -22,6 +22,9 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
+    if (response.config.__fullResponse) {
+      return response
+    }
     const res = response.data
     if (res.code !== 0) {
       ElMessage.error(res.message || '请求失败')
