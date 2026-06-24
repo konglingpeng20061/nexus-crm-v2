@@ -1,0 +1,179 @@
+<template>
+  <div class="activity-list">
+    <div class="activity-list__header">
+      <h4>今日待办</h4>
+      <el-button v-if="canCreate" type="primary" size="small" :icon="Plus" @click="$emit('add')">
+        新增
+      </el-button>
+    </div>
+
+    <el-skeleton v-if="loading" :rows="5" animated />
+
+    <el-empty v-else-if="items.length === 0" description="暂无待办" />
+
+    <div v-else class="activity-list__items">
+      <div
+        v-for="item in items"
+        :key="item.id"
+        class="activity-item"
+        :class="{ 'is-overdue': isOverdue(item) && item.status === 'pending' }"
+      >
+        <div class="activity-item__main">
+          <div class="activity-item__title-row">
+            <el-tag size="small" :type="priorityType(item.priority)">
+              {{ priorityLabel(item.priority) }}
+            </el-tag>
+            <span class="activity-item__title">{{ item.title }}</span>
+          </div>
+          <div class="activity-item__meta">
+            <span>{{ item.customerName }}</span>
+            <span>负责人：{{ item.ownerName }}</span>
+            <span>截止：{{ formatDate(item.dueAt) }}</span>
+          </div>
+        </div>
+        <div class="activity-item__actions">
+          <el-button
+            v-if="canEdit(item)"
+            :type="item.status === 'completed' ? 'info' : 'success'"
+            size="small"
+            text
+            @click="$emit('toggle-status', item)"
+          >
+            {{ item.status === 'completed' ? '重新打开' : '完成' }}
+          </el-button>
+          <el-button v-if="canEdit(item)" type="primary" size="small" text :icon="Edit" @click="$emit('edit', item)">
+            编辑
+          </el-button>
+          <el-button v-if="canEdit(item)" type="danger" size="small" text :icon="Delete" @click="$emit('delete', item)">
+            删除
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="error" class="activity-list__error">
+      <el-alert :title="error" type="error" show-icon :closable="false">
+        <template #default>
+          <el-button type="primary" link size="small" @click="$emit('refresh')">重新加载</el-button>
+        </template>
+      </el-alert>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { Plus, Edit, Delete } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+import { formatDate } from '@/utils/format'
+
+const props = defineProps({
+  items: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: '' }
+})
+
+defineEmits(['add', 'edit', 'delete', 'toggle-status', 'refresh'])
+
+const userStore = useUserStore()
+
+const isAdmin = computed(() => userStore.user?.role === 'admin')
+const canCreate = computed(() => true)
+
+function canEdit(item) {
+  return isAdmin.value || item.ownerId === userStore.user?.id
+}
+
+function priorityType(priority) {
+  const map = { low: 'info', medium: 'warning', high: 'danger' }
+  return map[priority] || 'info'
+}
+
+function priorityLabel(priority) {
+  const map = { low: '低', medium: '中', high: '高' }
+  return map[priority] || priority
+}
+
+function isOverdue(item) {
+  return new Date(item.dueAt) < new Date()
+}
+</script>
+
+<style lang="scss" scoped>
+.activity-list {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__error {
+    margin-top: 12px;
+  }
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f5f7fa;
+
+  &.is-overdue {
+    border-left: 4px solid #f56c6c;
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    font-size: 12px;
+    color: #909399;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+}
+</style>
