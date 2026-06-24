@@ -17,9 +17,17 @@
           :value="card.value"
           :description="card.description"
           :tone="card.tone"
+          :loading="summaryLoading"
+          :error="!!summaryError"
         />
       </el-col>
     </el-row>
+
+    <div v-if="summaryError" class="summary-error">
+      <el-alert :title="summaryError" type="error" show-icon :closable="false">
+        <el-button type="primary" link @click="loadSummary">重新加载</el-button>
+      </el-alert>
+    </div>
 
     <!-- 快捷操作 -->
     <div class="quick-actions">
@@ -460,6 +468,10 @@ onMounted(() => {
 
 .chart-error {
   margin-top: 12px;
+}
+
+.summary-error {
+  margin-bottom: 20px;
 }
 
 .activity-row {

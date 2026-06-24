@@ -2,15 +2,18 @@
   <div class="activity-list">
     <div class="activity-list__header">
       <h4>今日待办</h4>
-      <el-button v-if="canCreate" type="primary" size="small" :icon="Plus" @click="$emit('add')">
-        新增
-      </el-button>
+      <div class="activity-list__toolbar">
+        <el-checkbox v-model="onlyMine" size="small" label="只看我的" />
+        <el-button v-if="canCreate" type="primary" size="small" :icon="Plus" @click="$emit('add')">
+          新增
+        </el-button>
+      </div>
     </div>
 
     <div class="activity-list__body">
       <el-skeleton v-if="loading" :rows="5" animated />
 
-      <el-empty v-else-if="items.length === 0" description="暂无待办" />
+      <el-empty v-else-if="filteredItems.length === 0" :description="onlyMine ? '没有我的待办' : '暂无待办'" />
 
       <template v-else>
         <div class="activity-list__items" :class="{ collapsed: isCollapsed }">
@@ -53,9 +56,9 @@
           </div>
         </div>
 
-        <div v-if="items.length > collapseThreshold" class="activity-list__footer">
+        <div v-if="filteredItems.length > collapseThreshold" class="activity-list__footer">
           <el-button type="primary" link size="small" @click="toggleCollapsed">
-            {{ isCollapsed ? `展开全部 (${items.length})` : '收起' }}
+            {{ isCollapsed ? `展开全部 (${filteredItems.length})` : '收起' }}
             <el-icon class="expand-icon" :class="{ 'is-expanded': !isCollapsed }">
               <ArrowDown />
             </el-icon>
@@ -95,12 +98,19 @@ const canCreate = computed(() => true)
 
 const collapseThreshold = 5
 const isCollapsed = ref(true)
+const onlyMine = ref(false)
+
+const filteredItems = computed(() => {
+  if (!onlyMine.value) return props.items
+  return props.items.filter(item => item.ownerId === userStore.user?.id)
+})
 
 const visibleItems = computed(() => {
-  if (!isCollapsed.value || props.items.length <= collapseThreshold) {
-    return props.items
+  const list = filteredItems.value
+  if (!isCollapsed.value || list.length <= collapseThreshold) {
+    return list
   }
-  return props.items.slice(0, collapseThreshold)
+  return list.slice(0, collapseThreshold)
 })
 
 function toggleCollapsed() {
@@ -153,6 +163,12 @@ function isOverdue(item) {
       font-weight: 600;
       color: $text-primary;
     }
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   &__body {

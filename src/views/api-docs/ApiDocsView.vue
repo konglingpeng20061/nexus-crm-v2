@@ -1,7 +1,7 @@
 <template>
   <div class="api-docs-view">
     <h2>接口文档</h2>
-    <p class="api-docs-desc">以下为当前可用的模拟接口，点击"发送请求"可在线调试。</p>
+    <p class="api-docs-desc">以下为当前可用的模拟接口，点击"发送请求"可在线调试。Dashboard 接口支持 <code>?scenario=empty|error|partial</code> 参数。</p>
 
     <div class="api-list">
       <div v-for="api in apiList" :key="api.path" class="page-card api-item">
@@ -35,6 +35,15 @@
 <script setup>
 import { reactive } from 'vue'
 import { getMockHealth, resetMockData } from '@/api/mock'
+import {
+  getDashboardSummary,
+  getDashboardCustomerOptions,
+  getTodos,
+  getRecentFollows,
+  getSalesFunnel,
+  getContractTrend,
+  getTicketStatusDistribution
+} from '@/api/dashboard'
 
 const apiList = reactive([
   {
@@ -42,6 +51,76 @@ const apiList = reactive([
     path: '/api/health',
     desc: '获取模拟服务状态和数据版本',
     requestFn: getMockHealth,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/summary',
+    desc: '工作台六项核心指标聚合',
+    requestFn: getDashboardSummary,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/customers',
+    desc: '客户下拉选项',
+    requestFn: getDashboardCustomerOptions,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/todos',
+    desc: '今日待办列表',
+    requestFn: getTodos,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/recent-follows',
+    desc: '最近客户跟进记录',
+    requestFn: getRecentFollows,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/charts/sales-funnel',
+    desc: '销售漏斗数据',
+    requestFn: getSalesFunnel,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/charts/contract-trend',
+    desc: '十二个月合同趋势',
+    requestFn: getContractTrend,
+    loading: false,
+    result: null,
+    statusCode: null,
+    duration: 0
+  },
+  {
+    method: 'GET',
+    path: '/api/dashboard/charts/ticket-status',
+    desc: '工单状态分布',
+    requestFn: getTicketStatusDistribution,
     loading: false,
     result: null,
     statusCode: null,
@@ -93,6 +172,13 @@ async function sendRequest(api) {
 .api-docs-desc {
   color: $text-secondary;
   margin: 0 0 20px;
+
+  code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: $primary-color;
+  }
 }
 
 .api-list {
@@ -110,6 +196,7 @@ async function sendRequest(api) {
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .api-path {

@@ -3,12 +3,23 @@
     <div class="metric-card__accent" />
     <div class="metric-card__content">
       <div class="metric-card__label">{{ label }}</div>
-      <div class="metric-card__value" :title="String(value)">
-        {{ value }}
+      <div v-if="loading" class="metric-card__skeleton">
+        <el-skeleton animated :rows="0" />
       </div>
-      <div v-if="description" class="metric-card__desc" :title="description">
-        {{ description }}
-      </div>
+      <template v-else-if="error">
+        <div class="metric-card__error">加载失败</div>
+        <div v-if="description" class="metric-card__desc" :title="description">
+          {{ description }}
+        </div>
+      </template>
+      <template v-else>
+        <div class="metric-card__value" :title="String(value)">
+          {{ value }}
+        </div>
+        <div v-if="description" class="metric-card__desc" :title="description">
+          {{ description }}
+        </div>
+      </template>
     </div>
     <div v-if="$slots.footer" class="metric-card__footer">
       <slot name="footer" />
@@ -25,7 +36,9 @@ defineProps({
     type: String,
     default: 'primary',
     validator: v => ['primary', 'success', 'warning', 'danger', 'info'].includes(v)
-  }
+  },
+  loading: { type: Boolean, default: false },
+  error: { type: Boolean, default: false }
 })
 </script>
 
@@ -91,6 +104,21 @@ defineProps({
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__skeleton {
+    padding-top: 8px;
+
+    :deep(.el-skeleton__item) {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  &__error {
+    font-size: 20px;
+    font-weight: 600;
+    color: $danger-color;
+    padding: 4px 0;
   }
 
   &__footer {
