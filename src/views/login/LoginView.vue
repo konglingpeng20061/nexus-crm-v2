@@ -97,10 +97,13 @@ async function handleLogin() {
       username: form.username,
       password: form.password
     })
+    ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/dashboard'
     router.push(redirect)
-  } catch {
+  } catch (error) {
+    // 错误已由响应拦截器统一提示，这里清空密码并保留账号
     form.password = ''
+    console.error('[Login] 登录失败:', error)
   } finally {
     loading.value = false
   }

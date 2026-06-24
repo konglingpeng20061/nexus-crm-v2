@@ -39,8 +39,13 @@ request.interceptors.response.use(
       } else if (status === 403) {
         ElMessage.error('没有权限访问')
       } else {
-        ElMessage.error(error.response.data?.message || '请求失败')
+        ElMessage.error(error.response.data?.message || `请求失败（状态码：${status}）`)
       }
+    } else if (error.request) {
+      // 请求已发出但没有收到响应，通常是 MSW 未启动或网络异常
+      ElMessage.error('服务器未响应，请刷新页面后重试')
+    } else {
+      ElMessage.error(error.message || '请求失败')
     }
     return Promise.reject(error)
   }
