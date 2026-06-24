@@ -127,11 +127,19 @@ function isOverdue(item) {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .activity-list {
-  background: #fff;
+  background: $bg-card;
+  border: 1px solid $border-color;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  height: 100%;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
 
   &__header {
     display: flex;
@@ -143,12 +151,15 @@ function isOverdue(item) {
       margin: 0;
       font-size: 16px;
       font-weight: 600;
-      color: #303133;
+      color: $text-primary;
     }
   }
 
   &__body {
+    flex: 1;
     min-height: 120px;
+    display: flex;
+    flex-direction: column;
   }
 
   &__items {
@@ -168,7 +179,7 @@ function isOverdue(item) {
     justify-content: center;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid #ebeef5;
+    border-top: 1px solid $border-color;
   }
 
   &__error {
@@ -192,16 +203,18 @@ function isOverdue(item) {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f5f7fa;
-  transition: background 0.2s ease, transform 0.2s ease;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    background: #eef1f6;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.06);
     transform: translateX(2px);
   }
 
   &.is-overdue {
-    border-left: 4px solid #f56c6c;
+    border-left: 4px solid #f87171;
   }
 
   &__main {
@@ -221,12 +234,12 @@ function isOverdue(item) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #303133;
+    color: $text-primary;
   }
 
   &__meta {
     font-size: 12px;
-    color: #909399;
+    color: $text-secondary;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;

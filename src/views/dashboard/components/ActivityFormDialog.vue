@@ -5,6 +5,7 @@
     width="520px"
     destroy-on-close
     :close-on-click-modal="false"
+    class="dark-dialog"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <el-form-item label="客户" prop="customerId">
@@ -176,3 +177,38 @@ function finish() {
 
 defineExpose({ finish })
 </script>
+
+<style lang="scss">
+@import '@/styles/variables.scss';
+
+.dark-dialog {
+  .el-dialog__header {
+    background: $bg-surface;
+    border-bottom: 1px solid $border-color;
+    margin-right: 0;
+    padding: 16px 20px;
+  }
+
+  .el-dialog__title {
+    color: $text-primary;
+    font-weight: 600;
+  }
+
+  .el-dialog__body {
+    background: $bg-surface;
+    color: $text-primary;
+    padding: 20px;
+  }
+
+  .el-dialog__footer {
+    background: $bg-surface;
+    border-top: 1px solid $border-color;
+    padding: 12px 20px;
+  }
+
+  .el-form-item__label {
+    color: $text-secondary;
+  }
+}
+</style>
+

@@ -82,13 +82,16 @@ async function sendRequest(api) {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .api-docs-view h2 {
   margin: 0 0 8px;
   font-size: 20px;
+  color: $text-primary;
 }
 
 .api-docs-desc {
-  color: #999;
+  color: $text-secondary;
   margin: 0 0 20px;
 }
 
@@ -113,10 +116,11 @@ async function sendRequest(api) {
   font-family: monospace;
   font-size: 14px;
   font-weight: 600;
+  color: $text-primary;
 }
 
 .api-desc {
-  color: #999;
+  color: $text-secondary;
   font-size: 13px;
 }
 
@@ -125,8 +129,9 @@ async function sendRequest(api) {
 }
 
 .api-result {
-  background: #f5f7fa;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $border-color;
+  border-radius: 8px;
   padding: 12px;
 }
 
@@ -135,14 +140,15 @@ async function sendRequest(api) {
   gap: 20px;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #666;
+  color: $text-secondary;
 }
 
 .result-json {
   margin: 0;
-  background: #fff;
+  background: rgba(0, 0, 0, 0.25);
+  color: $text-primary;
   padding: 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 13px;
   line-height: 1.6;
   overflow-x: auto;

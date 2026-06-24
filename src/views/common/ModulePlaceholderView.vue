@@ -12,8 +12,11 @@ const route = useRoute()
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .module-placeholder h2 {
   margin: 0 0 20px;
   font-size: 20px;
+  color: $text-primary;
 }
 </style>

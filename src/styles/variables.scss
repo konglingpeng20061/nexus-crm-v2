@@ -1,8 +1,21 @@
 // 主题色
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
+$primary-color: #3b82f6;
+$success-color: #22c55e;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+
+// 深色主题背景
+$bg-page: #0b1120;
+$bg-surface: #111827;
+$bg-card: rgba(17, 24, 39, 0.85);
+$bg-card-solid: #111827;
+$border-color: rgba(255, 255, 255, 0.08);
+$text-primary: #f3f4f6;
+$text-secondary: #9ca3af;
+$text-muted: #6b7280;
+
+// 强调渐变
+$accent-gradient: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
 
 // 布局
 $base-padding: 20px;

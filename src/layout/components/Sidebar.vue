@@ -7,9 +7,9 @@
       :default-active="currentRoute"
       :collapse="appStore.sidebarCollapsed"
       :router="true"
-      background-color="#304156"
-      text-color="#bfcbd9"
-      active-text-color="#409eff"
+      background-color="transparent"
+      text-color="#9ca3af"
+      active-text-color="#f3f4f6"
     >
       <template v-for="item in userStore.menus" :key="item.path">
         <el-menu-item :index="item.path">
@@ -57,7 +57,8 @@ const currentRoute = computed(() => route.path)
   top: 0;
   bottom: 0;
   width: $sidebar-width;
-  background-color: #304156;
+  background: $bg-surface;
+  border-right: 1px solid $border-color;
   overflow-y: auto;
   transition: width 0.3s;
   z-index: 100;
@@ -74,11 +75,14 @@ const currentRoute = computed(() => route.path)
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid $border-color;
 }
 
 .logo-text {
-  color: #fff;
+  background: $accent-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: 20px;
   font-weight: 700;
   white-space: nowrap;
@@ -87,16 +91,52 @@ const currentRoute = computed(() => route.path)
 .el-menu {
   border-right: none;
   flex: 1;
+  padding: 12px 0;
+
+  :deep(.el-menu-item) {
+    margin: 4px 12px;
+    border-radius: 8px;
+    height: 44px;
+    line-height: 44px;
+    color: $text-secondary;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: $text-primary;
+    }
+
+    &.is-active {
+      background: rgba(59, 130, 246, 0.12);
+      color: $text-primary;
+      font-weight: 500;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 18px;
+        background: $accent-gradient;
+        border-radius: 0 2px 2px 0;
+      }
+    }
+  }
+
+  :deep(.el-icon) {
+    color: inherit;
+  }
 }
 
 .sidebar-footer {
   padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid $border-color;
   text-align: center;
 }
 
 .footer-text {
-  color: #7a8ba6;
+  color: $text-muted;
   font-size: 12px;
 }
 </style>

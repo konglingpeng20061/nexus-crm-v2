@@ -205,13 +205,14 @@ async function handleLogin() {
 .login-card {
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 40px;
   width: 420px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
   animation: card-enter 0.6s ease both;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
 }
 
 @keyframes card-enter {
@@ -242,20 +243,20 @@ async function handleLogin() {
     justify-content: center;
     font-size: 24px;
     font-weight: 700;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
   }
 
   &__title {
     margin: 0;
     font-size: 24px;
     font-weight: 700;
-    color: #1d2129;
+    color: #f3f4f6;
     letter-spacing: -0.02em;
   }
 
   &__desc {
     margin: 4px 0 0;
-    color: #606266;
+    color: #9ca3af;
     font-size: 13px;
   }
 }
@@ -279,13 +280,13 @@ async function handleLogin() {
 
 .login-demo-accounts {
   margin-top: 28px;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 20px;
 
   &__title {
     margin: 0 0 12px;
     font-size: 12px;
-    color: #909399;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
@@ -298,22 +299,24 @@ async function handleLogin() {
 }
 
 .demo-account {
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
   text-align: center;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    background: #eef1f6;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.06);
     transform: translateY(-2px);
   }
 
   &__role {
     display: block;
     font-size: 12px;
-    color: #606266;
+    color: #9ca3af;
     margin-bottom: 4px;
   }
 
@@ -321,7 +324,7 @@ async function handleLogin() {
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: #303133;
+    color: #f3f4f6;
   }
 }
 </style>

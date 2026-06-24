@@ -378,6 +378,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .dashboard-view {
   padding-bottom: 32px;
 
@@ -391,7 +393,7 @@ onMounted(() => {
       margin: 0;
       font-size: 22px;
       font-weight: 600;
-      color: #1d2129;
+      color: $text-primary;
       letter-spacing: -0.02em;
     }
   }
@@ -420,7 +422,7 @@ onMounted(() => {
 .section-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1d2129;
+  color: $text-primary;
   margin: 0 0 14px;
 }
 
@@ -441,15 +443,18 @@ onMounted(() => {
 }
 
 .chart-card {
-  background: #fff;
+  background: $bg-card;
+  border: 1px solid $border-color;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
   position: relative;
-  transition: box-shadow 0.25s ease;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -458,12 +463,18 @@ onMounted(() => {
 }
 
 .activity-row {
+  align-items: stretch;
+
   .activity-col {
     margin-bottom: 16px;
     animation: card-enter 0.6s ease both;
 
     &:nth-child(1) { animation-delay: 0.16s; }
     &:nth-child(2) { animation-delay: 0.2s; }
+
+    > * {
+      height: 100%;
+    }
   }
 }
 

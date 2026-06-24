@@ -18,8 +18,9 @@ function errorResponse(code, message, status = 200) {
   return HttpResponse.json({ code, message, data: null }, { status })
 }
 
-function generateToken() {
-  return 'token_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
+function generateToken(userId) {
+  // 自描述 Token：包含用户 ID 与随机后缀，即使 mock 数据重置也能解析
+  return `nexus_${userId}_${Math.random().toString(36).substring(2, 10)}`
 }
 
 function getTokenFromHeader(request) {
@@ -27,11 +28,29 @@ function getTokenFromHeader(request) {
   return auth.replace('Bearer ', '')
 }
 
+function extractUserIdFromToken(token) {
+  if (!token) return null
+  if (token.startsWith('nexus_')) {
+    const parts = token.split('_')
+    const id = parts[1] ? Number(parts[1]) : NaN
+    return Number.isFinite(id) ? id : null
+  }
+  return null
+}
+
 function getUserByToken(token) {
   const data = read()
+  // 优先通过 session 匹配
   const session = data.sessions.find(s => s.token === token)
-  if (!session) return null
-  return data.users.find(u => u.id === session.userId)
+  if (session) {
+    return data.users.find(u => u.id === session.userId)
+  }
+  // 兜底：自描述 Token 可直接解析用户 ID，避免数据重置后登录态丢失
+  const userId = extractUserIdFromToken(token)
+  if (userId) {
+    return data.users.find(u => u.id === userId)
+  }
+  return null
 }
 
 function requireAuth(request) {
@@ -88,17 +107,19 @@ export const handlers = [
       return errorResponse(403, '账号已被禁用，请联系管理员')
     }
 
-    const token = generateToken()
+    const token = generateToken(user.id)
     const now = new Date().toISOString()
 
     update(prev => {
       const updatedUsers = prev.users.map(u =>
         u.id === user.id ? { ...u, lastLoginAt: now } : u
       )
+      // 登录时清理该用户旧 session，避免 sessions 无限增长
+      const cleanedSessions = prev.sessions.filter(s => s.userId !== user.id)
       return {
         ...prev,
         users: updatedUsers,
-        sessions: [...prev.sessions, { token, userId: user.id, createdAt: now }]
+        sessions: [...cleanedSessions, { token, userId: user.id, createdAt: now }]
       }
     })
 

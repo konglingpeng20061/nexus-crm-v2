@@ -9,6 +9,8 @@
 </template>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .error-view {
   display: flex;
   align-items: center;
@@ -24,12 +26,12 @@
 .error-card h1 {
   font-size: 72px;
   margin: 0;
-  color: #f56c6c;
+  color: $danger-color;
 }
 
 .error-card p {
   margin: 16px 0 24px;
-  color: #999;
+  color: $text-secondary;
   font-size: 16px;
 }
 </style>

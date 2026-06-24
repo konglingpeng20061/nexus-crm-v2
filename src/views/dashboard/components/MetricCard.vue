@@ -30,21 +30,26 @@ defineProps({
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .metric-card {
   position: relative;
-  background: #fff;
+  background: $bg-card;
+  border: 1px solid $border-color;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   display: flex;
   flex-direction: column;
   gap: 12px;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   &__accent {
@@ -63,7 +68,7 @@ defineProps({
 
   &__label {
     font-size: 13px;
-    color: #606266;
+    color: $text-secondary;
     margin-bottom: 6px;
     letter-spacing: 0.02em;
   }
@@ -75,12 +80,12 @@ defineProps({
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #303133;
+    color: $text-primary;
   }
 
   &__desc {
     font-size: 12px;
-    color: #909399;
+    color: $text-muted;
     margin-top: 6px;
     max-width: 140px;
     overflow: hidden;
@@ -92,21 +97,21 @@ defineProps({
     margin-top: auto;
     padding-top: 12px;
     padding-left: 8px;
-    border-top: 1px solid #ebeef5;
+    border-top: 1px solid $border-color;
     font-size: 12px;
-    color: #909399;
+    color: $text-muted;
   }
 
-  &--primary { color: #409eff; }
-  &--success { color: #67c23a; }
-  &--warning { color: #e6a23c; }
-  &--danger { color: #f56c6c; }
-  &--info { color: #909399; }
+  &--primary { color: #60a5fa; }
+  &--success { color: #4ade80; }
+  &--warning { color: #fbbf24; }
+  &--danger { color: #f87171; }
+  &--info { color: #9ca3af; }
 
-  &--primary &__value { color: #409eff; }
-  &--success &__value { color: #67c23a; }
-  &--warning &__value { color: #e6a23c; }
-  &--danger &__value { color: #f56c6c; }
-  &--info &__value { color: #909399; }
+  &--primary &__value { color: #60a5fa; }
+  &--success &__value { color: #4ade80; }
+  &--warning &__value { color: #fbbf24; }
+  &--danger &__value { color: #f87171; }
+  &--info &__value { color: #9ca3af; }
 }
 </style>

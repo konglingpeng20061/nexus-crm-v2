@@ -2,7 +2,7 @@
   <header class="header-bar">
     <div class="header-left">
       <el-button text @click="appStore.toggleSidebar">
-        <el-icon :size="20">
+        <el-icon :size="20" color="#9ca3af">
           <Fold v-if="!appStore.sidebarCollapsed" />
           <Expand v-else />
         </el-icon>
@@ -12,11 +12,11 @@
       <span class="header-title">NexusCRM 管理系统</span>
     </div>
     <div class="header-right">
-      <el-tag type="warning" size="small">开发环境</el-tag>
+      <el-tag type="warning" size="small" effect="dark">开发环境</el-tag>
       <el-dropdown trigger="click" @command="handleCommand">
         <span class="header-user">
           {{ userStore.user?.name || '未登录' }}
-          <el-icon><ArrowDown /></el-icon>
+          <el-icon color="#9ca3af"><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -67,11 +67,11 @@ async function handleCommand(command) {
 
 .header-bar {
   height: $top-bar-height;
-  background: #fff;
+  background: $bg-surface;
+  border-bottom: 1px solid $border-color;
   display: flex;
   align-items: center;
   padding: 0 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 99;
@@ -89,7 +89,7 @@ async function handleCommand(command) {
 .header-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: $text-primary;
 }
 
 .header-right {
@@ -101,17 +101,18 @@ async function handleCommand(command) {
 
 .header-user {
   font-size: 14px;
-  color: #666;
+  color: $text-secondary;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
 
   &:hover {
-    background: #f5f7fa;
+    background: rgba(255, 255, 255, 0.04);
+    color: $text-primary;
   }
 }
 </style>

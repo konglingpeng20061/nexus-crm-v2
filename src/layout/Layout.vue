@@ -28,6 +28,7 @@ const appStore = useAppStore()
 .layout-shell {
   display: flex;
   min-height: 100vh;
+  background: $bg-page;
 }
 
 .app-main {
@@ -46,7 +47,7 @@ const appStore = useAppStore()
 .content-shell {
   padding: $base-padding;
   flex: 1;
-  background-color: #f5f7fa;
+  background: transparent;
 }
 
 .content-view {

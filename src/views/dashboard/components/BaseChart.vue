@@ -106,6 +106,8 @@ watch(() => [props.empty, props.loading], () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/variables.scss';
+
 .base-chart {
   position: relative;
   width: 100%;
@@ -122,7 +124,7 @@ watch(() => [props.empty, props.loading], () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
+    background: $bg-card-solid;
     z-index: 1;
   }
 }

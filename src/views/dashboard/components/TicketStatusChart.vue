@@ -19,32 +19,41 @@ const props = defineProps({
 })
 
 const statusColors = {
-  pending: '#f56c6c',
-  processing: '#e6a23c',
-  resolved: '#67c23a',
-  closed: '#909399'
+  pending: '#f87171',
+  processing: '#fbbf24',
+  resolved: '#4ade80',
+  closed: '#9ca3af'
 }
 
 const option = computed(() => {
   if (!props.data.length) return {}
 
   return {
-    title: { text: '工单状态分布', left: 'center', textStyle: { fontSize: 14 } },
+    backgroundColor: 'transparent',
+    title: { text: '工单状态分布', left: 'center', textStyle: { fontSize: 14, color: '#f3f4f6' } },
     tooltip: {
       trigger: 'item',
+      backgroundColor: 'rgba(17, 24, 39, 0.95)',
+      borderColor: 'rgba(255, 255, 255, 0.08)',
+      textStyle: { color: '#f3f4f6' },
       formatter: params => {
         const item = props.data[params.dataIndex]
         return `${item.statusName}<br/>数量：${item.count}<br/>占比：${item.ratio}%`
       }
     },
-    legend: { bottom: 0 },
+    legend: { bottom: 0, textStyle: { color: '#9ca3af' } },
     series: [
       {
         type: 'pie',
         radius: ['40%', '70%'],
         center: ['50%', '45%'],
         label: {
-          formatter: '{b}: {c} ({d}%)'
+          formatter: '{b}: {c} ({d}%)',
+          color: '#f3f4f6'
+        },
+        itemStyle: {
+          borderColor: 'rgba(17, 24, 39, 0.8)',
+          borderWidth: 2
         },
         data: props.data.map(d => ({
           name: d.statusName,
