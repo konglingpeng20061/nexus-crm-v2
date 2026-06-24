@@ -98,8 +98,18 @@ async function handleLogin() {
       password: form.password
     })
     ElMessage.success('登录成功')
-    const redirect = route.query.redirect || '/dashboard'
-    router.push(redirect)
+
+    // 安全解析跳转目标，避免循环或多值参数导致跳转失败
+    let redirect = route.query.redirect || '/dashboard'
+    if (Array.isArray(redirect)) {
+      redirect = redirect[0]
+    }
+    // 防止跳回登录页造成循环
+    const safeRedirect = typeof redirect === 'string' && redirect.startsWith('/login')
+      ? '/dashboard'
+      : redirect
+
+    await router.push(safeRedirect)
   } catch (error) {
     // 错误已由响应拦截器统一提示，这里清空密码并保留账号
     form.password = ''

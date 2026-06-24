@@ -22,6 +22,9 @@ export const useUserStore = defineStore('user', () => {
     user.value = res.user
     setStoredUser(res.user)
 
+    // 先标记初始化成功，避免路由守卫在后续请求期间再次触发 restoreSession
+    initialized.value = true
+
     const [routes, perms] = await Promise.all([
       getAuthRoutes(),
       getPermissions()
@@ -30,7 +33,6 @@ export const useUserStore = defineStore('user', () => {
     setStoredMenus(routes)
     permissions.value = perms
     setStoredPermissions(perms)
-    initialized.value = true
   }
 
   async function restoreSession() {

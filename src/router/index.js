@@ -93,18 +93,18 @@ router.beforeEach(async (to, from, next) => {
     return next()
   }
 
-  // 需要登录但无 Token -> 跳转登录页
-  if (to.meta.requiresAuth && !token) {
-    return next({ path: '/login', query: { redirect: to.fullPath } })
-  }
-
-  // 有 Token 但未初始化会话 -> 恢复会话
+  // 已登录但访问需要登录的页面时，确保用户态已初始化
   if (token && !userStore.initialized) {
     try {
       await userStore.restoreSession()
     } catch {
       return next({ path: '/login', query: { redirect: to.fullPath } })
     }
+  }
+
+  // 需要登录但无 Token -> 跳转登录页
+  if (to.meta.requiresAuth && !token) {
+    return next({ path: '/login', query: { redirect: to.fullPath } })
   }
 
   // 角色限制检查

@@ -1,10 +1,6 @@
-功能(day-3+): 工作台首页数据看板、待办跟进与业务图表
+修复(day-3): 修复登录成功后无法跳转到工作台的问题
 
-- 扩展 mock 数据库，生成关联的客户、商机、合同、工单、待办和跟进数据
-- 新增 dashboard 聚合函数，实时计算六项核心指标
-- 实现 MSW dashboard 统计、待办、跟进、图表接口，支持 scenario 异常测试
-- 封装 Dashboard API 与金额/数量/日期格式化工具
-- 创建可复用的 MetricCard 指标卡组件
-- 实现待办/跟进列表、统一表单弹窗与管理员/负责人权限校验
-- 封装 BaseChart 组件与销售漏斗、合同趋势、工单状态分布三个业务图表
-- 更新 DashboardView 整合指标卡、图表、待办跟进与快捷操作
+- 在 LoginView 中使用 await router.push，防止异步跳转异常被静默吞掉
+- 安全解析 route.query.redirect，避免多值参数或登录页地址导致跳转循环
+- 调整路由守卫中会话恢复的顺序，确保有 Token 即可提前初始化用户态
+- 在 userStore.login 中提前标记 initialized，防止跳转期间重复触发 restoreSession
