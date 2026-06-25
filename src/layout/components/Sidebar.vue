@@ -8,8 +8,8 @@
       :collapse="appStore.sidebarCollapsed"
       :router="true"
       background-color="transparent"
-      text-color="#606266"
-      active-text-color="#3b82f6"
+      text-color="#9ca3af"
+      active-text-color="#ffffff"
     >
       <template v-for="item in userStore.menus" :key="item.path">
         <el-menu-item :index="item.path">
@@ -57,8 +57,7 @@ const currentRoute = computed(() => route.path)
   top: 0;
   bottom: 0;
   width: $sidebar-width;
-  background: $bg-surface;
-  border-right: 1px solid $border-color;
+  background: $sidebar-bg;
   overflow-y: auto;
   transition: width 0.3s;
   z-index: 100;
@@ -75,7 +74,7 @@ const currentRoute = computed(() => route.path)
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .logo-text {
@@ -98,16 +97,13 @@ const currentRoute = computed(() => route.path)
     border-radius: 8px;
     height: 44px;
     line-height: 44px;
-    color: $text-secondary;
 
     &:hover {
-      background: rgba(59, 130, 246, 0.06);
-      color: $primary-color;
+      background: rgba(255, 255, 255, 0.06);
     }
 
     &.is-active {
-      background: rgba(59, 130, 246, 0.08);
-      color: $primary-color;
+      background: rgba(59, 130, 246, 0.15);
       font-weight: 500;
 
       &::before {
@@ -131,7 +127,7 @@ const currentRoute = computed(() => route.path)
 
 .sidebar-footer {
   padding: 12px 16px;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   text-align: center;
 }
 
