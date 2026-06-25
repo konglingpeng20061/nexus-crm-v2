@@ -120,8 +120,7 @@ function methodLabel(method) {
   border: 1px solid $border-color;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   height: 100%;
   min-height: 460px;
   display: flex;
@@ -189,13 +188,13 @@ function methodLabel(method) {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: #f9fafb;
   border: 1px solid transparent;
   transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.06);
+    background: #f3f4f6;
+    border-color: #e5e7eb;
     transform: translateX(2px);
   }
 

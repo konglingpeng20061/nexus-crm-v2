@@ -8,8 +8,8 @@
       :collapse="appStore.sidebarCollapsed"
       :router="true"
       background-color="transparent"
-      text-color="#9ca3af"
-      active-text-color="#f3f4f6"
+      text-color="#606266"
+      active-text-color="#3b82f6"
     >
       <template v-for="item in userStore.menus" :key="item.path">
         <el-menu-item :index="item.path">
@@ -101,13 +101,13 @@ const currentRoute = computed(() => route.path)
     color: $text-secondary;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: $text-primary;
+      background: rgba(59, 130, 246, 0.06);
+      color: $primary-color;
     }
 
     &.is-active {
-      background: rgba(59, 130, 246, 0.12);
-      color: $text-primary;
+      background: rgba(59, 130, 246, 0.08);
+      color: $primary-color;
       font-weight: 500;
 
       &::before {

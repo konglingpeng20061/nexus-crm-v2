@@ -51,8 +51,7 @@ defineProps({
   border: 1px solid $border-color;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   display: flex;
@@ -60,9 +59,9 @@ defineProps({
   gap: 12px;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #d0d5dd;
   }
 
   &__accent {
@@ -110,7 +109,7 @@ defineProps({
     padding-top: 8px;
 
     :deep(.el-skeleton__item) {
-      background: rgba(255, 255, 255, 0.08);
+      background: #e5e7eb;
     }
   }
 
@@ -130,16 +129,16 @@ defineProps({
     color: $text-muted;
   }
 
-  &--primary { color: #60a5fa; }
-  &--success { color: #4ade80; }
-  &--warning { color: #fbbf24; }
-  &--danger { color: #f87171; }
-  &--info { color: #9ca3af; }
+  &--primary { color: #3b82f6; }
+  &--success { color: #22c55e; }
+  &--warning { color: #f59e0b; }
+  &--danger { color: #ef4444; }
+  &--info { color: #6b7280; }
 
-  &--primary &__value { color: #60a5fa; }
-  &--success &__value { color: #4ade80; }
-  &--warning &__value { color: #fbbf24; }
-  &--danger &__value { color: #f87171; }
-  &--info &__value { color: #9ca3af; }
+  &--primary &__value { color: #3b82f6; }
+  &--success &__value { color: #22c55e; }
+  &--warning &__value { color: #f59e0b; }
+  &--danger &__value { color: #ef4444; }
+  &--info &__value { color: #6b7280; }
 }
 </style>

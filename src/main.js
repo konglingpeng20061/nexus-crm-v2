@@ -7,9 +7,6 @@ import App from './App.vue'
 import router from './router'
 import './styles/index.scss'
 
-// 启用 Element Plus 暗黑模式
-document.documentElement.classList.add('dark')
-
 async function bootstrap() {
   if (import.meta.env.DEV) {
     // 清除旧的 MSW Service Worker 缓存，确保加载最新 handler

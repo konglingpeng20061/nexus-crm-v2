@@ -365,7 +365,7 @@ onMounted(() => {
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 16px;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
   h3 {
     margin: 0;
@@ -401,7 +401,7 @@ onMounted(() => {
 }
 
 :deep(.info-table) {
-  --el-descriptions-item-bordered-label-background: rgba(255,255,255,0.04);
+  --el-descriptions-item-bordered-label-background: #f5f7fa;
   --el-descriptions-table-border-color: $border-color;
 
   .el-descriptions__label {

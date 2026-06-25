@@ -313,7 +313,7 @@ onMounted(() => {
   border-radius: 12px;
   padding: 16px 20px;
   margin-bottom: 16px;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
   :deep(.el-form-item) {
     margin-bottom: 0;
@@ -332,7 +332,7 @@ onMounted(() => {
   border-radius: 12px;
   padding: 0;
   overflow: hidden;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
   :deep(.el-table) {
     --el-table-bg-color: transparent;

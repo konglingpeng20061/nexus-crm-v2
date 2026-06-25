@@ -110,9 +110,9 @@ async function handleCommand(command) {
   border-radius: 6px;
   transition: background 0.2s, color 0.2s;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.04);
-    color: $text-primary;
-  }
+    &:hover {
+      background: rgba(59, 130, 246, 0.06);
+      color: $primary-color;
+    }
 }
 </style>

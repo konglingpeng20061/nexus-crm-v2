@@ -5,7 +5,7 @@
     width="520px"
     destroy-on-close
     :close-on-click-modal="false"
-    class="dark-dialog"
+    class="app-dialog"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <el-form-item label="客户" prop="customerId">
@@ -181,7 +181,7 @@ defineExpose({ finish })
 <style lang="scss">
 @import '@/styles/variables.scss';
 
-.dark-dialog {
+.app-dialog {
   .el-dialog__header {
     background: $bg-surface;
     border-bottom: 1px solid $border-color;
@@ -204,10 +204,6 @@ defineExpose({ finish })
     background: $bg-surface;
     border-top: 1px solid $border-color;
     padding: 12px 20px;
-  }
-
-  .el-form-item__label {
-    color: $text-secondary;
   }
 }
 </style>
