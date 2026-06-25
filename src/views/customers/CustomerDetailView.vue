@@ -369,11 +369,18 @@ onMounted(() => {
 
 .info-card {
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 20px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
 
   h3 {
     margin: 0;

@@ -1,31 +1,34 @@
 <template>
   <aside class="sidebar" :class="{ collapsed: appStore.sidebarCollapsed }">
-    <div class="sidebar-logo">
-      <span class="logo-text">{{ appStore.sidebarCollapsed ? 'N' : 'NexusCRM' }}</span>
-    </div>
-    <el-menu
-      :default-active="currentRoute"
-      :collapse="appStore.sidebarCollapsed"
-      :router="true"
-      background-color="transparent"
-      text-color="#9ca3af"
-      active-text-color="#ffffff"
-    >
-      <template v-for="item in userStore.menus" :key="item.path">
-        <el-menu-item :index="item.path">
-          <el-icon>
-            <component :is="iconMap[item.icon] || Monitor" />
-          </el-icon>
-          <template #title>
-            {{ appStore.sidebarCollapsed ? item.shortLabel : item.title }}
-          </template>
-        </el-menu-item>
-      </template>
-    </el-menu>
-    <div class="sidebar-footer">
-      <span class="footer-text">
-        可访问模块: {{ userStore.menus.length }}
-      </span>
+    <div class="sidebar-bg" />
+    <div class="sidebar-inner">
+      <div class="sidebar-logo">
+        <span class="logo-text">{{ appStore.sidebarCollapsed ? 'N' : 'NexusCRM' }}</span>
+      </div>
+      <el-menu
+        :default-active="currentRoute"
+        :collapse="appStore.sidebarCollapsed"
+        :router="true"
+        background-color="transparent"
+        text-color="#94a3b8"
+        active-text-color="#ffffff"
+      >
+        <template v-for="item in userStore.menus" :key="item.path">
+          <el-menu-item :index="item.path">
+            <el-icon>
+              <component :is="iconMap[item.icon] || Monitor" />
+            </el-icon>
+            <template #title>
+              {{ appStore.sidebarCollapsed ? item.shortLabel : item.title }}
+            </template>
+          </el-menu-item>
+        </template>
+      </el-menu>
+      <div class="sidebar-footer">
+        <span class="footer-text">
+          {{ userStore.menus.length }} 个模块
+        </span>
+      </div>
     </div>
   </aside>
 </template>
@@ -57,16 +60,31 @@ const currentRoute = computed(() => route.path)
   top: 0;
   bottom: 0;
   width: $sidebar-width;
-  background: $sidebar-bg;
-  overflow-y: auto;
-  transition: width 0.3s;
   z-index: 100;
   display: flex;
-  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.collapsed {
     width: 64px;
   }
+}
+
+.sidebar-bg {
+  position: absolute;
+  inset: 0;
+  background: $sidebar-bg;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  background-image: radial-gradient(ellipse at 0% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                    radial-gradient(ellipse at 100% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+}
+
+.sidebar-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .sidebar-logo {
@@ -74,7 +92,8 @@ const currentRoute = computed(() => route.path)
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -83,56 +102,75 @@ const currentRoute = computed(() => route.path)
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
+  letter-spacing: -0.02em;
 }
 
 .el-menu {
   border-right: none;
   flex: 1;
-  padding: 12px 0;
+  padding: 16px 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+  }
 
   :deep(.el-menu-item) {
-    margin: 4px 12px;
-    border-radius: 8px;
+    margin: 4px 0;
+    border-radius: 10px;
     height: 44px;
     line-height: 44px;
+    transition: all 0.2s ease;
+    font-weight: 450;
+    position: relative;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.06);
+      background: $sidebar-hover !important;
     }
 
     &.is-active {
-      background: rgba(59, 130, 246, 0.15);
-      font-weight: 500;
+      background: $sidebar-active !important;
+      font-weight: 600;
 
       &::before {
         content: '';
         position: absolute;
-        left: 0;
+        left: -8px;
         top: 50%;
         transform: translateY(-50%);
         width: 3px;
-        height: 18px;
+        height: 20px;
         background: $accent-gradient;
-        border-radius: 0 2px 2px 0;
+        border-radius: 0 3px 3px 0;
       }
     }
   }
 
   :deep(.el-icon) {
     color: inherit;
+    font-size: 18px;
   }
 }
 
 .sidebar-footer {
   padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
   text-align: center;
+  flex-shrink: 0;
 }
 
 .footer-text {
   color: $text-muted;
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  opacity: 0.6;
 }
 </style>

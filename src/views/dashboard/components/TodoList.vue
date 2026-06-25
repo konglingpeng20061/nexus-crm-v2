@@ -141,10 +141,12 @@ function isOverdue(item) {
 
 .activity-list {
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
   height: 100%;
   min-height: 460px;
   display: flex;
@@ -218,13 +220,13 @@ function isOverdue(item) {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: #f9fafb;
+  background: rgba(99, 102, 241, 0.03);
   border: 1px solid transparent;
-  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    background: #f3f4f6;
-    border-color: #e5e7eb;
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.1);
     transform: translateX(2px);
   }
 

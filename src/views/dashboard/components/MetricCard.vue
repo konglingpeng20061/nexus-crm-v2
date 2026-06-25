@@ -48,20 +48,21 @@ defineProps({
 .metric-card {
   position: relative;
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 12px;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #d0d5dd;
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
   }
 
   &__accent {

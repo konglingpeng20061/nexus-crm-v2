@@ -2,7 +2,7 @@
   <header class="header-bar">
     <div class="header-left">
       <el-button text @click="appStore.toggleSidebar">
-        <el-icon :size="20" color="#9ca3af">
+        <el-icon :size="20">
           <Fold v-if="!appStore.sidebarCollapsed" />
           <Expand v-else />
         </el-icon>
@@ -12,11 +12,12 @@
       <span class="header-title">NexusCRM 管理系统</span>
     </div>
     <div class="header-right">
-      <el-tag type="warning" size="small" effect="dark">开发环境</el-tag>
+      <el-tag size="small" effect="plain" class="env-tag">开发环境</el-tag>
       <el-dropdown trigger="click" @command="handleCommand">
         <span class="header-user">
+          <span class="user-avatar">{{ userStore.user?.name?.charAt(0) || '?' }}</span>
           {{ userStore.user?.name || '未登录' }}
-          <el-icon color="#9ca3af"><ArrowDown /></el-icon>
+          <el-icon><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -68,13 +69,16 @@ async function handleCommand(command) {
 .header-bar {
   height: $top-bar-height;
   background: $bg-surface;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid $border-color;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 99;
+  gap: 12px;
 }
 
 .header-left {
@@ -87,9 +91,14 @@ async function handleCommand(command) {
 }
 
 .header-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: $text-primary;
+  letter-spacing: 0.02em;
+  background: $accent-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-right {
@@ -99,20 +108,40 @@ async function handleCommand(command) {
   flex: 0 0 auto;
 }
 
+.env-tag {
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  color: $primary-color !important;
+  font-weight: 500;
+}
+
 .header-user {
   font-size: 14px;
   color: $text-secondary;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  transition: background 0.2s, color 0.2s;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
 
-    &:hover {
-      background: rgba(59, 130, 246, 0.06);
-      color: $primary-color;
-    }
+  &:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $accent-gradient;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 </style>

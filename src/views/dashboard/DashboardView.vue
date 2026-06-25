@@ -452,16 +452,17 @@ onMounted(() => {
 
 .chart-card {
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
   position: relative;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.3s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #d0d5dd;
+    box-shadow: $shadow-md;
   }
 }
 

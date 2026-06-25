@@ -314,11 +314,26 @@ onMounted(() => {
 
 .filter-card {
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 16px 20px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-sm;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: $accent-gradient;
+    opacity: 0.5;
+  }
 
   :deep(.el-form-item) {
     margin-bottom: 0;
@@ -333,11 +348,13 @@ onMounted(() => {
 
 .table-card {
   background: $bg-card;
-  border: 1px solid $border-color;
-  border-radius: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: $glass-border;
+  border-radius: $border-radius;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-md;
 
   :deep(.el-table) {
     --el-table-bg-color: transparent;

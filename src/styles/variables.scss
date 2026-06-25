@@ -1,20 +1,30 @@
-$primary-color: #3b82f6;
-$success-color: #22c55e;
+$primary-color: #6366f1;
+$primary-light: #818cf8;
+$success-color: #10b981;
 $warning-color: #f59e0b;
 $danger-color: #ef4444;
+$info-color: #06b6d4;
 
-$bg-page: #eef0f4;
-$bg-surface: #ffffff;
-$bg-card: #ffffff;
+$bg-page: #f0f2f8;
+$bg-surface: rgba(255, 255, 255, 0.75);
+$bg-card: rgba(255, 255, 255, 0.82);
 $bg-card-solid: #ffffff;
-$sidebar-bg: #1c1e26;
-$border-color: #e4e7ed;
-$text-primary: #303133;
-$text-secondary: #606266;
-$text-muted: #909399;
+$sidebar-bg: #0f172a;
+$sidebar-hover: rgba(255, 255, 255, 0.06);
+$sidebar-active: rgba(99, 102, 241, 0.2);
+$border-color: rgba(0, 0, 0, 0.06);
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
 
-$accent-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+$accent-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+$page-gradient: linear-gradient(135deg, #f0f2f8 0%, #e8ecf8 50%, #f0eef8 100%);
 
 $base-padding: 20px;
 $top-bar-height: 60px;
 $sidebar-width: 220px;
+$border-radius: 14px;
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.06);
+$glass-border: 1px solid rgba(255, 255, 255, 0.7);
