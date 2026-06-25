@@ -155,7 +155,7 @@ const cityMap = {
   '山东省': ['济南市', '青岛市', '烟台市', '潍坊市']
 }
 
-const cityOptions = computed(() => (props.customer || form).province ? (cityMap[(props.customer || form).province] || []) : [])
+const cityOptions = computed(() => form.province ? (cityMap[form.province] || []) : [])
 
 const formRef = ref(null)
 

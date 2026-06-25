@@ -114,8 +114,8 @@
           :page-sizes="[10, 20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next"
-          @size-change="pagination.changePageSize"
-          @current-change="pagination.changePage"
+          @size-change="onPageSizeChange"
+          @current-change="onPageChange"
           background
         />
       </div>
@@ -133,12 +133,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { usePagination } from '@/composables/usePagination'
 import { Plus, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { computed } from 'vue'
 import { getCustomers, createCustomer, updateCustomer, deleteCustomer, getCustomerFilterOptions } from '@/api/customer'
 import { formatDateTime } from '@/utils/format'
 import CustomerFormDialog from './components/CustomerFormDialog.vue'
@@ -222,9 +221,15 @@ function handleSearch() {
   loadData()
 }
 
-watch(() => ({ page: pagination.page.value, pageSize: pagination.pageSize.value }), () => {
+function onPageChange(val) {
+  pagination.changePage(val)
   loadData()
-})
+}
+
+function onPageSizeChange(val) {
+  pagination.changePageSize(val)
+  loadData()
+}
 
 function openCreate() {
   editingCustomer.value = null

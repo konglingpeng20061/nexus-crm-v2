@@ -180,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ArrowLeft } from '@element-plus/icons-vue'
@@ -230,6 +230,17 @@ const ownerSaving = ref(false)
 const selectedOwnerId = ref(null)
 const ownerOptions = ref([])
 
+function resetFollowForm() {
+  followForm.method = 'phone'
+  followForm.content = ''
+  followForm.nextFollowAt = ''
+  followFormRef.value?.clearValidate()
+}
+
+watch(followVisible, (val) => {
+  if (val) resetFollowForm()
+})
+
 async function loadCustomer() {
   loading.value = true
   errorMessage.value = ''
@@ -266,20 +277,17 @@ async function handleAddFollow() {
   } catch {
     return
   }
-  followSaving.value = true
-  try {
-    const result = await createCustomerFollow(route.params.id, {
-      method: followForm.method,
-      content: followForm.content,
-      nextFollowAt: followForm.nextFollowAt
-    })
-    customer.value = result
-    ElMessage.success('跟进记录已添加')
-    followVisible.value = false
-    followForm.method = 'phone'
-    followForm.content = ''
-    followForm.nextFollowAt = ''
-  } catch {
+    followSaving.value = true
+    try {
+      const result = await createCustomerFollow(route.params.id, {
+        method: followForm.method,
+        content: followForm.content,
+        nextFollowAt: followForm.nextFollowAt
+      })
+      customer.value = result
+      ElMessage.success('跟进记录已添加')
+      followVisible.value = false
+    } catch {
     // error handled by interceptor
   } finally {
     followSaving.value = false
