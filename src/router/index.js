@@ -28,8 +28,14 @@ const routes = [
       {
         path: 'customers',
         name: 'Customers',
-        component: () => import('@/views/common/ModulePlaceholderView.vue'),
+        component: () => import('@/views/customers/CustomerListView.vue'),
         meta: { title: '客户管理', roles: ['admin', 'manager', 'sales', 'support'] }
+      },
+      {
+        path: 'customers/:id',
+        name: 'CustomerDetail',
+        component: () => import('@/views/customers/CustomerDetailView.vue'),
+        meta: { title: '客户详情', roles: ['admin', 'manager', 'sales', 'support'] }
       },
       {
         path: 'opportunities',
@@ -77,7 +83,6 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  // 公开页面直接放行
   if (to.meta.public) {
     return next()
   }
@@ -85,7 +90,6 @@ router.beforeEach(async (to, from, next) => {
   const token = getToken()
   const userStore = useUserStore()
 
-  // 已登录访问登录页 -> 跳转工作台
   if (to.name === 'Login') {
     if (token) {
       return next('/dashboard')
@@ -93,7 +97,6 @@ router.beforeEach(async (to, from, next) => {
     return next()
   }
 
-  // 已登录但访问需要登录的页面时，确保用户态已初始化
   if (token && !userStore.initialized) {
     try {
       await userStore.restoreSession()
@@ -102,12 +105,10 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  // 需要登录但无 Token -> 跳转登录页
   if (to.meta.requiresAuth && !token) {
     return next({ path: '/login', query: { redirect: to.fullPath } })
   }
 
-  // 角色限制检查
   if (to.meta.roles) {
     const userRole = userStore.user?.role
     if (userRole && !to.meta.roles.includes(userRole)) {

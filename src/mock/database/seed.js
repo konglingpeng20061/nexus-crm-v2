@@ -2,7 +2,6 @@ import { fakerZH_CN as faker } from '@faker-js/faker'
 
 faker.seed(2026)
 
-// 角色定义
 const roles = [
   {
     name: 'admin',
@@ -16,6 +15,10 @@ const roles = [
       'dashboard:view',
       'customer:view',
       'customer:create',
+      'customer:edit',
+      'customer:delete',
+      'customer:assign',
+      'customer:follow',
       'opportunity:create',
       'contract:approve',
       'ticket:handle'
@@ -28,6 +31,8 @@ const roles = [
       'dashboard:view',
       'customer:view',
       'customer:create',
+      'customer:edit',
+      'customer:follow',
       'opportunity:create'
     ]
   },
@@ -49,7 +54,6 @@ const roles = [
   }
 ]
 
-// 菜单定义
 const menus = [
   {
     path: '/dashboard',
@@ -95,7 +99,6 @@ const menus = [
   }
 ]
 
-// 5个固定演示账号 + 10个普通用户
 const demoUsers = [
   {
     id: 1,
@@ -177,7 +180,6 @@ const demoUsers = [
   }
 ]
 
-// 额外生成10个普通用户
 const extraUsers = Array.from({ length: 10 }, (_, i) => ({
   id: i + 7,
   username: faker.internet.username(),
@@ -197,40 +199,119 @@ const extraUsers = Array.from({ length: 10 }, (_, i) => ({
 
 const allUsers = [...demoUsers, ...extraUsers]
 const activeUsers = allUsers.filter(u => u.status === 'active')
-const salesUsers = activeUsers.filter(u => u.role === 'sales' || u.role === 'manager' || u.role === 'admin')
-const supportUsers = activeUsers.filter(u => u.role === 'support' || u.role === 'admin')
+const validOwners = activeUsers.filter(u => ['admin', 'manager', 'sales'].includes(u.role))
 
-// 客户数据 40-50 条
-const customerStatuses = ['active', 'inactive', 'potential']
-const customerLevels = ['A', 'B', 'C', 'D']
-const customers = Array.from({ length: 45 }, (_, i) => {
-  const status = faker.helpers.arrayElement(customerStatuses)
-  const owner = faker.helpers.arrayElement(salesUsers)
-  return {
-    id: i + 1,
+const industries = ['互联网', '制造业', '金融', '教育', '医疗', '零售', '物流']
+const levels = ['A', 'B', 'C']
+const statuses = ['active', 'potential', 'inactive', 'at_risk']
+const sources = ['线上注册', '客户推荐', '市场活动', '电话拜访', '官网咨询', '渠道合作']
+const provinces = ['北京市', '上海市', '广东省', '浙江省', '江苏省', '四川省', '湖北省', '山东省']
+const cityMap = {
+  '北京市': ['朝阳区', '海淀区', '西城区', '东城区'],
+  '上海市': ['浦东新区', '徐汇区', '静安区', '长宁区'],
+  '广东省': ['深圳市', '广州市', '东莞市', '佛山市'],
+  '浙江省': ['杭州市', '宁波市', '温州市', '嘉兴市'],
+  '江苏省': ['南京市', '苏州市', '无锡市', '常州市'],
+  '四川省': ['成都市', '绵阳市', '德阳市', '宜宾市'],
+  '湖北省': ['武汉市', '宜昌市', '襄阳市', '荆州市'],
+  '山东省': ['济南市', '青岛市', '烟台市', '潍坊市']
+}
+
+const followMethods = ['phone', 'visit', 'wechat', 'email']
+const followContents = [
+  '与客户确认了产品需求，客户表示下周安排内部评审。',
+  '电话沟通了报价方案，客户对价格有异议，需要申请折扣。',
+  '上门拜访关键决策人，现场演示了核心功能，反馈积极。',
+  '微信发送了案例资料，客户已查阅并询问实施周期。',
+  '邮件确认了合同条款，法务部门正在审核。',
+  '沟通了实施计划和时间节点，客户基本认可方案。',
+  '电话回访了解使用情况，客户反馈了一些优化建议。',
+  '邀请参加产品培训会，客户表示会安排人员参加。'
+]
+
+const customers = []
+const customerFollows = []
+let customerIdCounter = 0
+let followIdCounter = 0
+
+for (let i = 0; i < 48; i++) {
+  customerIdCounter++
+  const id = customerIdCounter
+  const cid = 'CUS-' + String(id).padStart(8, '0')
+  const industry = faker.helpers.arrayElement(industries)
+  const level = faker.helpers.arrayElement(levels)
+  const status = faker.helpers.arrayElement(statuses)
+  const owner = faker.helpers.arrayElement(validOwners)
+  const province = faker.helpers.arrayElement(provinces)
+  const city = faker.helpers.arrayElement(cityMap[province])
+
+  const createdAt = faker.date.between({ from: '2024-01-01', to: '2025-12-31' }).toISOString()
+
+  const customer = {
+    id,
     name: faker.company.name(),
-    contactName: faker.person.fullName(),
-    phone: faker.phone.number(),
-    email: faker.internet.email(),
-    address: faker.location.city() + faker.location.street(),
-    level: faker.helpers.arrayElement(customerLevels),
+    industry,
+    level,
     status,
     ownerId: owner.id,
-    createdAt: faker.date.past({ years: 2 }).toISOString(),
-    updatedAt: faker.date.recent({ days: 90 }).toISOString()
+    province,
+    city,
+    address: faker.location.streetAddress(),
+    source: faker.helpers.arrayElement(sources),
+    contactName: faker.person.fullName(),
+    contactPhone: '1' + faker.helpers.arrayElement(['38', '39', '58', '86', '35']) + faker.string.numeric({ length: 8 }),
+    contactTitle: faker.person.jobTitle(),
+    contactEmail: faker.internet.email(),
+    description: faker.helpers.arrayElement([
+      '该公司为行业领先企业，具有良好的合作潜力。',
+      '中小型企业，预算适中，关注性价比。',
+      '初创公司，决策链条短，需求明确。',
+      '大型集团，决策周期较长，需要持续跟进。',
+      '外资企业，合规要求高，需要定制方案。',
+      ''
+    ]),
+    lastFollowAt: null,
+    createdAt,
+    updatedAt: faker.date.between({ from: '2025-06-01', to: '2026-06-24' }).toISOString()
   }
-})
+
+  if (level === 'A') {
+    const followCount = faker.helpers.arrayElement([1, 2, 3])
+    let lastFollow = null
+    for (let j = 0; j < followCount; j++) {
+      followIdCounter++
+      const fCreatedAt = faker.date.between({
+        from: new Date(customer.createdAt),
+        to: new Date('2026-06-24')
+      }).toISOString()
+      customerFollows.push({
+        id: followIdCounter,
+        customerId: customer.id,
+        ownerId: faker.helpers.arrayElement(validOwners).id,
+        method: faker.helpers.arrayElement(followMethods),
+        content: faker.helpers.arrayElement(followContents),
+        nextFollowAt: faker.date.soon({ days: 14 }).toISOString(),
+        createdAt: fCreatedAt,
+        updatedAt: fCreatedAt
+      })
+      if (!lastFollow || new Date(fCreatedAt) > new Date(lastFollow)) {
+        lastFollow = fCreatedAt
+      }
+    }
+    customer.lastFollowAt = lastFollow
+    customer.updatedAt = lastFollow || customer.updatedAt
+  }
+
+  customers.push(customer)
+}
 
 const activeCustomers = customers.filter(c => c.status === 'active')
-
-// 商机阶段与状态
-const opportunityStages = ['lead', 'qualification', 'proposal', 'negotiation', 'closed']
-const opportunityStatuses = ['active', 'won', 'lost', 'paused']
+const followMethods2 = ['phone', 'visit', 'wechat', 'email']
 
 const opportunities = Array.from({ length: 35 }, (_, i) => {
   const customer = faker.helpers.arrayElement(customers)
-  const owner = faker.helpers.arrayElement(salesUsers)
-  const stage = faker.helpers.arrayElement(opportunityStages)
+  const owner = faker.helpers.arrayElement(validOwners)
+  const stage = faker.helpers.arrayElement(['lead', 'qualification', 'proposal', 'negotiation', 'closed'])
   const status = stage === 'closed'
     ? faker.helpers.arrayElement(['won', 'lost'])
     : faker.helpers.arrayElement(['active', 'active', 'active', 'paused'])
@@ -249,12 +330,11 @@ const opportunities = Array.from({ length: 35 }, (_, i) => {
   }
 })
 
-// 合同数据 20-30 条
 const contractStatuses = ['draft', 'signed', 'executing', 'completed', 'terminated']
 const contracts = Array.from({ length: 25 }, (_, i) => {
   const customer = faker.helpers.arrayElement(customers)
   const opportunity = faker.helpers.arrayElement(opportunities)
-  const owner = faker.helpers.arrayElement(salesUsers)
+  const owner = faker.helpers.arrayElement(validOwners)
   const status = faker.helpers.arrayElement(contractStatuses)
   const amount = faker.number.int({ min: 100000, max: 5000000 })
   const signDate = faker.date.past({ years: 1 }).toISOString()
@@ -274,11 +354,11 @@ const contracts = Array.from({ length: 25 }, (_, i) => {
   }
 })
 
-// 工单数据 25-35 条
 const ticketStatuses = ['pending', 'processing', 'resolved', 'closed']
 const ticketPriorities = ['low', 'medium', 'high', 'urgent']
 const tickets = Array.from({ length: 30 }, (_, i) => {
   const customer = faker.helpers.arrayElement(customers)
+  const supportUsers = activeUsers.filter(u => u.role === 'support' || u.role === 'admin')
   const assignee = faker.helpers.arrayElement(supportUsers)
   const status = faker.helpers.arrayElement(ticketStatuses)
   return {
@@ -294,7 +374,6 @@ const tickets = Array.from({ length: 30 }, (_, i) => {
   }
 })
 
-// 待办数据 8-12 条
 const todoPriorities = ['low', 'medium', 'high']
 const todoStatuses = ['pending', 'completed']
 const todos = Array.from({ length: 10 }, (_, i) => {
@@ -314,33 +393,10 @@ const todos = Array.from({ length: 10 }, (_, i) => {
   }
 })
 
-// 跟进数据 10 条
-const followMethods = ['phone', 'visit', 'wechat', 'email']
-const follows = Array.from({ length: 12 }, (_, i) => {
-  const customer = faker.helpers.arrayElement(customers)
-  const owner = faker.helpers.arrayElement(activeUsers)
-  return {
-    id: i + 1,
-    customerId: customer.id,
-    ownerId: owner.id,
-    method: faker.helpers.arrayElement(followMethods),
-    content: faker.helpers.arrayElement([
-      '与客户确认了产品需求，客户表示下周安排内部评审。',
-      '电话沟通了报价方案，客户对价格有异议，需要申请折扣。',
-      '上门拜访关键决策人，现场演示了核心功能，反馈积极。',
-      '微信发送了案例资料，客户已查阅并询问实施周期。',
-      '邮件确认了合同条款，法务部门正在审核。'
-    ]),
-    nextFollowAt: faker.date.soon({ days: 14 }).toISOString(),
-    createdAt: faker.date.recent({ days: 60 }).toISOString(),
-    updatedAt: faker.date.recent({ days: 10 }).toISOString()
-  }
-})
-
 export function generateSeedData() {
   faker.seed(2026)
   return {
-    version: 4,
+    version: 5,
     seed: 2026,
     generatedAt: new Date().toISOString(),
     users: allUsers,
@@ -352,6 +408,6 @@ export function generateSeedData() {
     contracts,
     tickets,
     todos,
-    follows
+    follows: customerFollows
   }
 }

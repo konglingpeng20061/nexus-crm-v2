@@ -9,6 +9,16 @@ import {
   getTodos,
   getRecentFollows
 } from '../database/dashboard'
+import {
+  queryCustomers,
+  getCustomerFilterOptions,
+  getCustomerDetail,
+  validateCustomerInput,
+  normalizeCustomerInput,
+  getCustomerDeleteConflict,
+  isValidCustomerOwner,
+  validateFollowRecordInput
+} from '../database/customers'
 
 function successResponse(data) {
   return HttpResponse.json({ code: 0, message: '操作成功', data })
@@ -19,7 +29,6 @@ function errorResponse(code, message, status = 200) {
 }
 
 function generateToken(userId) {
-  // 自描述 Token：包含用户 ID 与随机后缀，即使 mock 数据重置也能解析
   return `nexus_${userId}_${Math.random().toString(36).substring(2, 10)}`
 }
 
@@ -40,12 +49,10 @@ function extractUserIdFromToken(token) {
 
 function getUserByToken(token) {
   const data = read()
-  // 优先通过 session 匹配
   const session = data.sessions.find(s => s.token === token)
   if (session) {
     return data.users.find(u => u.id === session.userId)
   }
-  // 兜底：自描述 Token 可直接解析用户 ID，避免数据重置后登录态丢失
   const userId = extractUserIdFromToken(token)
   if (userId) {
     return data.users.find(u => u.id === userId)
@@ -58,6 +65,22 @@ function requireAuth(request) {
   const user = getUserByToken(token)
   if (!user) return { error: errorResponse(401, '未登录或 Token 已过期') }
   return { user }
+}
+
+function checkPermission(user, permission) {
+  const data = read()
+  const role = data.roles.find(r => r.name === user.role)
+  if (!role) return false
+  return role.permissions.includes('*') || role.permissions.includes(permission)
+}
+
+function requirePermission(request, permission) {
+  const auth = requireAuth(request)
+  if (auth.error) return { error: auth.error }
+  if (!checkPermission(auth.user, permission)) {
+    return { error: errorResponse(403, '没有权限执行此操作') }
+  }
+  return { user: auth.user }
 }
 
 function getScenario(request) {
@@ -114,7 +137,6 @@ export const handlers = [
       const updatedUsers = prev.users.map(u =>
         u.id === user.id ? { ...u, lastLoginAt: now } : u
       )
-      // 登录时清理该用户旧 session，避免 sessions 无限增长
       const cleanedSessions = prev.sessions.filter(s => s.userId !== user.id)
       return {
         ...prev,
@@ -399,6 +421,232 @@ export const handlers = [
       return successResponse(result.map((item, index) => index % 2 === 0 ? { ...item, count: undefined } : item))
     }
     return successResponse(createTicketStatusDistribution(data))
+  }),
+
+  // GET /api/customers/options
+  http.get('/api/customers/options', ({ request }) => {
+    const perm = requirePermission(request, 'customer:view')
+    if (perm.error) return perm.error
+
+    const data = read()
+    return successResponse(getCustomerFilterOptions(data))
+  }),
+
+  // GET /api/customers
+  http.get('/api/customers', ({ request }) => {
+    const perm = requirePermission(request, 'customer:view')
+    if (perm.error) return perm.error
+
+    const url = new URL(request.url)
+    const params = Object.fromEntries(url.searchParams.entries())
+    const data = read()
+    return successResponse(queryCustomers(data, params))
+  }),
+
+  // POST /api/customers
+  http.post('/api/customers', async ({ request }) => {
+    const perm = requirePermission(request, 'customer:create')
+    if (perm.error) return perm.error
+
+    const body = await request.json()
+    const data = read()
+
+    const validation = validateCustomerInput(data, body)
+    if (!validation.valid) {
+      const status = validation.conflictCode || 400
+      const firstError = validation.errors[0]
+      return errorResponse(status, firstError.message)
+    }
+
+    const normalized = normalizeCustomerInput(body)
+    const now = new Date().toISOString()
+    const maxId = data.customers.length ? Math.max(...data.customers.map(c => c.id)) : 0
+
+    const newCustomer = {
+      ...normalized,
+      id: maxId + 1,
+      lastFollowAt: null,
+      createdAt: now,
+      updatedAt: now
+    }
+
+    update(prev => ({
+      ...prev,
+      customers: [...prev.customers, newCustomer]
+    }))
+
+    const om = new Map(data.users.map(u => [u.id, u.name]))
+    const result = {
+      ...newCustomer,
+      ownerName: om.get(newCustomer.ownerId) || '未知',
+      region: [newCustomer.province, newCustomer.city].filter(Boolean).join(' ')
+    }
+
+    return successResponse(result)
+  }),
+
+  // GET /api/customers/:id
+  http.get('/api/customers/:id', ({ request, params }) => {
+    const perm = requirePermission(request, 'customer:view')
+    if (perm.error) return perm.error
+
+    const data = read()
+    const detail = getCustomerDetail(data, params.id)
+    if (!detail) {
+      return errorResponse(404, '客户不存在或已删除', 404)
+    }
+    return successResponse(detail)
+  }),
+
+  // PUT /api/customers/:id
+  http.put('/api/customers/:id', async ({ request, params }) => {
+    const perm = requirePermission(request, 'customer:edit')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const body = await request.json()
+    const data = read()
+
+    const customer = data.customers.find(c => c.id === id)
+    if (!customer) {
+      return errorResponse(404, '客户不存在或已删除', 404)
+    }
+
+    if (!checkPermission(perm.user, 'customer:assign')) {
+      if (body.ownerId !== undefined && Number(body.ownerId) !== customer.ownerId) {
+        return errorResponse(403, '没有权限修改客户负责人', 403)
+      }
+      body.ownerId = customer.ownerId
+    }
+
+    const merged = { ...customer, ...body, id: customer.id, createdAt: customer.createdAt, lastFollowAt: customer.lastFollowAt }
+
+    const validation = validateCustomerInput(data, merged, customer.id)
+    if (!validation.valid) {
+      const status = validation.conflictCode || 400
+      const firstError = validation.errors[0]
+      return errorResponse(status, firstError.message)
+    }
+
+    const normalized = normalizeCustomerInput(merged)
+    const now = new Date().toISOString()
+
+    update(prev => ({
+      ...prev,
+      customers: prev.customers.map(c =>
+        c.id === id ? { ...c, ...normalized, id: c.id, createdAt: c.createdAt, lastFollowAt: c.lastFollowAt, updatedAt: now } : c
+      )
+    }))
+
+    const updatedData = read()
+    const detail = getCustomerDetail(updatedData, id)
+    return successResponse(detail)
+  }),
+
+  // DELETE /api/customers/:id
+  http.delete('/api/customers/:id', ({ request, params }) => {
+    const perm = requirePermission(request, 'customer:delete')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const data = read()
+
+    const customer = data.customers.find(c => c.id === id)
+    if (!customer) {
+      return errorResponse(404, '客户不存在或已删除', 404)
+    }
+
+    const conflicts = getCustomerDeleteConflict(data, id)
+    if (conflicts.length > 0) {
+      return errorResponse(409, `该客户存在${conflicts.join('、')}，无法删除`, 409)
+    }
+
+    update(prev => ({
+      ...prev,
+      customers: prev.customers.filter(c => c.id !== id),
+      follows: prev.follows.filter(f => f.customerId !== id),
+      todos: prev.todos.filter(t => t.customerId !== id)
+    }))
+
+    return successResponse(null)
+  }),
+
+  // POST /api/customers/:id/follows
+  http.post('/api/customers/:id/follows', async ({ request, params }) => {
+    const perm = requirePermission(request, 'customer:follow')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const body = await request.json()
+
+    const validation = validateFollowRecordInput(body)
+    if (!validation.valid) {
+      return errorResponse(400, validation.errors[0].message, 400)
+    }
+
+    const data = read()
+    const customer = data.customers.find(c => c.id === id)
+    if (!customer) {
+      return errorResponse(404, '客户不存在或已删除', 404)
+    }
+
+    const now = new Date().toISOString()
+    const maxId = data.follows.length ? Math.max(...data.follows.map(f => f.id)) : 0
+
+    const newFollow = {
+      id: maxId + 1,
+      customerId: id,
+      ownerId: perm.user.id,
+      method: body.method,
+      content: body.content,
+      nextFollowAt: body.nextFollowAt,
+      createdAt: now,
+      updatedAt: now
+    }
+
+    update(prev => ({
+      ...prev,
+      follows: [...prev.follows, newFollow],
+      customers: prev.customers.map(c =>
+        c.id === id ? { ...c, lastFollowAt: now, updatedAt: now } : c
+      )
+    }))
+
+    const updatedData = read()
+    const detail = getCustomerDetail(updatedData, id)
+    return successResponse(detail)
+  }),
+
+  // PUT /api/customers/:id/owner
+  http.put('/api/customers/:id/owner', async ({ request, params }) => {
+    const perm = requirePermission(request, 'customer:assign')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const body = await request.json()
+
+    const data = read()
+    const customer = data.customers.find(c => c.id === id)
+    if (!customer) {
+      return errorResponse(404, '客户不存在或已删除', 404)
+    }
+
+    const newOwnerId = Number(body.ownerId)
+    if (!isValidCustomerOwner(data, newOwnerId)) {
+      return errorResponse(400, '无效的负责人，负责人必须是激活的超级管理员、销售经理或销售代表', 400)
+    }
+
+    const now = new Date().toISOString()
+    update(prev => ({
+      ...prev,
+      customers: prev.customers.map(c =>
+        c.id === id ? { ...c, ownerId: newOwnerId, updatedAt: now } : c
+      )
+    }))
+
+    const updatedData = read()
+    const detail = getCustomerDetail(updatedData, id)
+    return successResponse(detail)
   }),
 
   // GET /api/health
