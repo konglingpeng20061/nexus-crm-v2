@@ -1,9 +1,11 @@
 // dashboard 聚合函数
 
+const ACTIVE_OPPORTUNITY_STAGES = ['lead', 'qualified', 'proposal', 'negotiation']
+
 export function createDashboardSummary(database) {
   const customerCount = database.customers.length
   const activeCustomerCount = database.customers.filter(c => c.status === 'active').length
-  const activeOpportunities = database.opportunities.filter(o => o.status === 'active')
+  const activeOpportunities = database.opportunities.filter(o => ACTIVE_OPPORTUNITY_STAGES.includes(o.stage))
   const activeOpportunityCount = activeOpportunities.length
   const opportunityAmount = activeOpportunities.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
   const contractAmount = database.contracts
@@ -21,25 +23,16 @@ export function createDashboardSummary(database) {
   }
 }
 
-export function createSalesFunnel(database) {
-  const stages = ['lead', 'qualification', 'proposal', 'negotiation', 'closed']
-  const stageLabels = {
-    lead: '线索',
-    qualification: '验证',
-    proposal: '提案',
-    negotiation: '谈判',
-    closed: '关闭'
-  }
+import { OPPORTUNITY_STAGES } from './opportunities'
 
-  return stages.map(stage => {
-    const items = database.opportunities.filter(o => o.stage === stage)
-    const count = items.length
-    const amount = items.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
+export function createSalesFunnel(database) {
+  return OPPORTUNITY_STAGES.map(s => {
+    const items = database.opportunities.filter(o => o.stage === s.value)
     return {
-      stage,
-      stageName: stageLabels[stage],
-      count,
-      amount
+      stage: s.value,
+      stageName: s.label,
+      count: items.length,
+      amount: items.reduce((sum, o) => sum + (Number(o.amount) || 0), 0)
     }
   })
 }

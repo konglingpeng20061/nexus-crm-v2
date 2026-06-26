@@ -19,6 +19,17 @@ import {
   isValidCustomerOwner,
   validateFollowRecordInput
 } from '../database/customers'
+import {
+  OPPORTUNITY_STAGES,
+  queryOpportunities,
+  createOpportunityStatistics,
+  getOpportunityDetail,
+  validateOpportunityInput,
+  normalizeOpportunityInput,
+  validateStageTransition,
+  getAllowedStageTransitions,
+  createOpportunityBoard
+} from '../database/opportunities'
 
 function successResponse(data) {
   return HttpResponse.json({ code: 0, message: '操作成功', data })
@@ -646,6 +657,209 @@ export const handlers = [
 
     const updatedData = read()
     const detail = getCustomerDetail(updatedData, id)
+    return successResponse(detail)
+  }),
+
+  // GET /api/opportunities/statistics
+  http.get('/api/opportunities/statistics', ({ request }) => {
+    const perm = requirePermission(request, 'opportunity:view')
+    if (perm.error) return perm.error
+
+    const url = new URL(request.url)
+    const params = Object.fromEntries(url.searchParams.entries())
+    const data = read()
+    return successResponse(createOpportunityStatistics(data, params))
+  }),
+
+  // GET /api/opportunities/board
+  http.get('/api/opportunities/board', ({ request }) => {
+    const perm = requirePermission(request, 'opportunity:view')
+    if (perm.error) return perm.error
+
+    const data = read()
+    return successResponse(createOpportunityBoard(data))
+  }),
+
+  // GET /api/opportunities
+  http.get('/api/opportunities', ({ request }) => {
+    const perm = requirePermission(request, 'opportunity:view')
+    if (perm.error) return perm.error
+
+    const url = new URL(request.url)
+    const params = Object.fromEntries(url.searchParams.entries())
+    const data = read()
+    return successResponse(queryOpportunities(data, params))
+  }),
+
+  // POST /api/opportunities
+  http.post('/api/opportunities', async ({ request }) => {
+    const perm = requirePermission(request, 'opportunity:create')
+    if (perm.error) return perm.error
+
+    const body = await request.json()
+    const data = read()
+
+    const validation = validateOpportunityInput(data, body)
+    if (!validation.valid) {
+      return errorResponse(400, validation.errors[0].message, 400)
+    }
+
+    const normalized = normalizeOpportunityInput(body)
+    const now = new Date().toISOString()
+
+    update(prev => {
+      const maxId = prev.opportunities.length ? Math.max(...prev.opportunities.map(o => o.id)) : 0
+      const maxSrId = (prev.opportunityStageRecords || []).length ? Math.max(...prev.opportunityStageRecords.map(r => r.id)) : 0
+
+      const newOp = {
+        ...normalized,
+        id: maxId + 1,
+        createdAt: now,
+        updatedAt: now
+      }
+
+      const initialRecord = {
+        id: maxSrId + 1,
+        opportunityId: maxId + 1,
+        fromStage: null,
+        toStage: normalized.stage,
+        changedBy: perm.user.id,
+        note: '创建商机',
+        changedAt: now
+      }
+
+      return {
+        ...prev,
+        opportunities: [...prev.opportunities, newOp],
+        opportunityStageRecords: [...(prev.opportunityStageRecords || []), initialRecord]
+      }
+    })
+
+    const updatedData = read()
+    const detail = getOpportunityDetail(updatedData, maxId ? maxId + 1 : 1)
+    return successResponse(detail)
+  }),
+
+  // GET /api/opportunities/:id
+  http.get('/api/opportunities/:id', ({ request, params }) => {
+    const perm = requirePermission(request, 'opportunity:view')
+    if (perm.error) return perm.error
+
+    const data = read()
+    const detail = getOpportunityDetail(data, params.id)
+    if (!detail) return errorResponse(404, '商机不存在或已删除', 404)
+    return successResponse(detail)
+  }),
+
+  // PUT /api/opportunities/:id
+  http.put('/api/opportunities/:id', async ({ request, params }) => {
+    const perm = requirePermission(request, 'opportunity:edit')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const body = await request.json()
+    const data = read()
+
+    const opportunity = data.opportunities.find(o => o.id === id)
+    if (!opportunity) return errorResponse(404, '商机不存在或已删除', 404)
+
+    // 强制使用原商机阶段，防止绕过阶段状态机
+    body.stage = opportunity.stage
+    const merged = { ...opportunity, ...body, id: opportunity.id, createdAt: opportunity.createdAt }
+
+    const validation = validateOpportunityInput(data, merged)
+    if (!validation.valid) {
+      return errorResponse(400, validation.errors[0].message, 400)
+    }
+
+    const normalized = normalizeOpportunityInput(merged)
+    const now = new Date().toISOString()
+
+    update(prev => ({
+      ...prev,
+      opportunities: prev.opportunities.map(o =>
+        o.id === id ? { ...o, ...normalized, id: o.id, createdAt: o.createdAt, updatedAt: now } : o
+      )
+    }))
+
+    const updatedData = read()
+    const detail = getOpportunityDetail(updatedData, id)
+    return successResponse(detail)
+  }),
+
+  // DELETE /api/opportunities/:id
+  http.delete('/api/opportunities/:id', ({ request, params }) => {
+    const perm = requirePermission(request, 'opportunity:delete')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const data = read()
+
+    const opportunity = data.opportunities.find(o => o.id === id)
+    if (!opportunity) return errorResponse(404, '商机不存在或已删除', 404)
+
+    update(prev => ({
+      ...prev,
+      opportunities: prev.opportunities.filter(o => o.id !== id),
+      opportunityStageRecords: (prev.opportunityStageRecords || []).filter(r => r.opportunityId !== id)
+    }))
+
+    return successResponse(null)
+  }),
+
+  // PATCH /api/opportunities/:id/stage
+  http.patch('/api/opportunities/:id/stage', async ({ request, params }) => {
+    const perm = requirePermission(request, 'opportunity:stage')
+    if (perm.error) return perm.error
+
+    const id = Number(params.id)
+    const body = await request.json()
+    const data = read()
+
+    const opportunity = data.opportunities.find(o => o.id === id)
+    if (!opportunity) return errorResponse(404, '商机不存在或已删除', 404)
+
+    const validation = validateStageTransition(opportunity, body)
+    if (!validation.valid) {
+      const status = validation.conflictCode || 400
+      return errorResponse(status, validation.errors[0].message, status)
+    }
+
+    const now = new Date().toISOString()
+
+    update(prev => {
+      const targetStage = body.stage
+      const stageConfig = OPPORTUNITY_STAGES.find(s => s.value === targetStage)
+      const probability = stageConfig ? stageConfig.probability : 0
+      const nextStep = stageConfig?.terminal ? '' : (body.nextStep || '').trim()
+      const records = prev.opportunityStageRecords || []
+      const maxSrId = records.length ? Math.max(...records.map(r => r.id)) : 0
+
+      return {
+        ...prev,
+        opportunities: prev.opportunities.map(o =>
+          o.id === id ? {
+            ...o,
+            stage: targetStage,
+            probability,
+            nextStep,
+            updatedAt: now
+          } : o
+        ),
+        opportunityStageRecords: [...records, {
+          id: maxSrId + 1,
+          opportunityId: id,
+          fromStage: opportunity.stage,
+          toStage: targetStage,
+          changedBy: perm.user.id,
+          note: body.note || '',
+          changedAt: now
+        }]
+      }
+    })
+
+    const updatedData = read()
+    const detail = getOpportunityDetail(updatedData, id)
     return successResponse(detail)
   }),
 

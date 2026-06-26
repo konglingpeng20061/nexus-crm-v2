@@ -14,6 +14,7 @@
     "axios": "^1.7.0",
     "echarts": "^5.5.0",
     "element-plus": "^2.8.0",
+    "isomorphic-git": "^1.38.5",
     "msw": "^2.4.0",
     "pinia": "^2.1.0",
     "vue": "^3.4.0",

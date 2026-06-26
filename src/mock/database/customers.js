@@ -209,9 +209,10 @@ export function normalizeCustomerInput(input) {
 }
 
 export function getCustomerDeleteConflict(database, customerId) {
-  const hasOpportunity = database.opportunities.some(o => o.customerId === Number(customerId))
-  const hasContract = database.contracts.some(c => c.customerId === Number(customerId))
-  const hasTicket = database.tickets.some(t => t.customerId === Number(customerId))
+  const numId = Number(customerId)
+  const hasOpportunity = database.opportunities.some(o => o.customerId === numId)
+  const hasContract = database.contracts.some(c => c.customerId === numId)
+  const hasTicket = database.tickets.some(t => t.customerId === numId)
   const conflicts = []
   if (hasOpportunity) conflicts.push('关联商机')
   if (hasContract) conflicts.push('关联合同')

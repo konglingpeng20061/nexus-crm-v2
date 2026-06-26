@@ -19,7 +19,10 @@ const roles = [
       'customer:delete',
       'customer:assign',
       'customer:follow',
+      'opportunity:view',
       'opportunity:create',
+      'opportunity:edit',
+      'opportunity:stage',
       'contract:approve',
       'ticket:handle'
     ]
@@ -33,7 +36,10 @@ const roles = [
       'customer:create',
       'customer:edit',
       'customer:follow',
-      'opportunity:create'
+      'opportunity:view',
+      'opportunity:create',
+      'opportunity:edit',
+      'opportunity:stage'
     ]
   },
   {
@@ -306,29 +312,86 @@ for (let i = 0; i < 48; i++) {
 }
 
 const activeCustomers = customers.filter(c => c.status === 'active')
-const followMethods2 = ['phone', 'visit', 'wechat', 'email']
 
-const opportunities = Array.from({ length: 35 }, (_, i) => {
-  const customer = faker.helpers.arrayElement(customers)
-  const owner = faker.helpers.arrayElement(validOwners)
-  const stage = faker.helpers.arrayElement(['lead', 'qualification', 'proposal', 'negotiation', 'closed'])
-  const status = stage === 'closed'
-    ? faker.helpers.arrayElement(['won', 'lost'])
-    : faker.helpers.arrayElement(['active', 'active', 'active', 'paused'])
-  const amount = faker.number.int({ min: 50000, max: 2000000 })
-  return {
-    id: i + 1,
-    title: faker.commerce.productName() + ' 项目',
-    customerId: customer.id,
-    ownerId: owner.id,
-    stage,
-    status,
-    amount,
-    expectedCloseDate: faker.date.future({ years: 1 }).toISOString(),
-    createdAt: faker.date.past({ years: 1 }).toISOString(),
-    updatedAt: faker.date.recent({ days: 60 }).toISOString()
+const OPPORTUNITY_STAGES = [
+  { value: 'lead', label: '初步接触', probability: 10, terminal: false },
+  { value: 'qualified', label: '需求确认', probability: 30, terminal: false },
+  { value: 'proposal', label: '方案报价', probability: 50, terminal: false },
+  { value: 'negotiation', label: '合同谈判', probability: 75, terminal: false },
+  { value: 'won', label: '已成交', probability: 100, terminal: true },
+  { value: 'lost', label: '已流失', probability: 0, terminal: true }
+]
+
+const opportunities = []
+const opportunityStageRecords = []
+let opId = 0
+let srId = 0
+const nextStepOptions = ['完成需求确认', '准备报价方案', '安排产品演示', '发送合同草案', '跟进客户审批', '预约下次会议']
+const stageNoteOptions = ['需求确认完成', '方案已提交客户', '进入合同谈判阶段', '客户意向强烈', '客户决定暂时搁置']
+
+const stageOrder = ['lead', 'qualified', 'proposal', 'negotiation', 'won', 'lost']
+
+for (const stage of stageOrder) {
+  for (let j = 0; j < 8; j++) {
+    opId++
+    const customer = faker.helpers.arrayElement(customers)
+    const owner = faker.helpers.arrayElement(validOwners)
+    const cfg = OPPORTUNITY_STAGES.find(s => s.value === stage)
+    const amount = faker.number.int({ min: 50000, max: 3000000 })
+
+    const createdAt = faker.date.past({ years: 1 }).toISOString()
+    const now = new Date('2026-06-25T12:00:00.000Z')
+
+    let expectedCloseDate = faker.date.soon({ days: 60, refDate: '2026-06-25T12:00:00.000Z' }).toISOString()
+    if (!cfg.terminal && j < 3) {
+      expectedCloseDate = faker.date.past({ years: 1, refDate: '2026-06-25T12:00:00.000Z' }).toISOString()
+    }
+
+    const updatedAt = faker.date.between({ from: new Date(createdAt), to: now }).toISOString()
+
+    const opportunity = {
+      id: opId,
+      name: faker.commerce.productName() + '项目',
+      customerId: customer.id,
+      ownerId: owner.id,
+      stage,
+      amount,
+      probability: cfg.probability,
+      expectedCloseDate,
+      nextStep: cfg.terminal ? '' : faker.helpers.arrayElement(nextStepOptions),
+      description: j % 3 === 0 ? faker.helpers.arrayElement(['客户需求明确，决策链条清晰。', '竞争对手报价中，需加快跟进。', '客户对方案认可，正在内部审批。']) : '',
+      createdAt,
+      updatedAt
+    }
+    opportunities.push(opportunity)
+
+    srId++
+    opportunityStageRecords.push({
+      id: srId, opportunityId: opId, fromStage: null, toStage: 'lead',
+      changedBy: owner.id, note: '创建商机', changedAt: createdAt
+    })
+
+    const idx = stageOrder.indexOf(stage)
+    const progression = stageOrder.slice(1, idx + 1)
+    for (const nextStage of progression) {
+      if (stage === 'lost' && nextStage === 'lost') break
+      const from = progression.indexOf(nextStage) >= 0
+        ? stageOrder[stageOrder.indexOf(nextStage) - 1]
+        : null
+      if (!from) continue
+
+      srId++
+      const record = {
+        id: srId, opportunityId: opId, fromStage: from, toStage: nextStage,
+        changedBy: faker.helpers.arrayElement(validOwners).id,
+        note: nextStage === 'lost' ? faker.helpers.arrayElement(stageNoteOptions) : faker.helpers.arrayElement(stageNoteOptions),
+        changedAt: faker.date.between({ from: new Date(createdAt), to: new Date(updatedAt) }).toISOString()
+      }
+      if (nextStage === 'lost') record.note = '客户决定暂时搁置'
+      opportunityStageRecords.push(record)
+    }
   }
-})
+}
 
 const contractStatuses = ['draft', 'signed', 'executing', 'completed', 'terminated']
 const contracts = Array.from({ length: 25 }, (_, i) => {
@@ -396,7 +459,7 @@ const todos = Array.from({ length: 10 }, (_, i) => {
 export function generateSeedData() {
   faker.seed(2026)
   return {
-    version: 5,
+    version: 6,
     seed: 2026,
     generatedAt: new Date().toISOString(),
     users: allUsers,
@@ -405,6 +468,7 @@ export function generateSeedData() {
     sessions: [],
     customers,
     opportunities,
+    opportunityStageRecords,
     contracts,
     tickets,
     todos,
